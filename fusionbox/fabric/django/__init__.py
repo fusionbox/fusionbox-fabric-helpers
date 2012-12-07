@@ -1,7 +1,7 @@
-from fabric.api import run, env, cd
+from fabric.api import run, env
 
 from fusionbox.fabric.git_helpers import update_git_with_rsync
-from fusionbox.fabric import virtualenv, files_changed
+from fusionbox.fabric import virtualenv, files_changed, project_directory
 
 
 def stage(pip=False, migrate=False, syncdb=False, branch=None):
@@ -9,15 +9,15 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None):
     stage will update the remote git version to your local HEAD, collectstatic, migrate and
     update pip if necessary.
 
-    Set ``env.project_name`` and ``env.short_name`` appropriately to use.
+    Set ``env.project_name`` and ``env.project_abbr`` appropriately to use.
     ``env.tld`` defaults to ``.com``
     """
-    with cd('/var/www/%s%s' % (env.project_name, env.tld)):
+    with project_directory():
         version = update_git_with_rsync(branch or 'HEAD')
         update_pip = pip or files_changed(version, "requirements.txt")
-        migrate = migrate or files_changed(version, "*/migrations/* %s/settings.py requirements.txt" % env.project_name)
+        migrate = migrate or files_changed(version, "*/migrations/* {project_name}/settings.py requirements.txt".format(**env))
         syncdb = syncdb or files_changed(version, "*/settings.py")
-        with virtualenv(env.short_name):
+        with virtualenv(env.project_abbr):
             if update_pip:
                 run("pip install -r ./requirements.txt")
             if syncdb:
@@ -26,7 +26,7 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None):
                 run("python manage.py backupdb")
                 run("python manage.py migrate")
             run("python manage.py collectstatic --noinput")
-        run("sudo touch /etc/vassals/%s.ini" % env.short_name)
+        run("sudo touch /etc/vassals/{project_abbr}.ini".format(**env))
 
 
 def deploy():
@@ -34,3 +34,12 @@ def deploy():
     Like stage, but always migrates, pips, and uses the live branch
     """
     stage(True, True, True, "live")
+
+
+def shell():
+    """
+    Fires up a shell.
+    """
+    with project_directory():
+        with virtualenv(env.project_abbr):
+            run("bash -")
