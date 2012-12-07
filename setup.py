@@ -34,6 +34,6 @@ setup(name='fusionbox-fabric-helpers',
         'Topic :: System :: Software Distribution',
         'Topic :: System :: Systems Administration',
     ],
-    install_requires=['fabric'],
+    install_requires=['fabric>=1.4'],
     requires=['fabric'],
 )

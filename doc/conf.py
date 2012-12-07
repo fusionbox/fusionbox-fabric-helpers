@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# django-fusionbox documentation build configuration file, created by
+# fusionbox-fabric-helpers documentation build configuration file, created by
 # sphinx-quickstart on Tue Oct  4 12:34:14 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'django-fusionbox'
+project = u'fusionbox-fabric-helpers'
 copyright = u'2012, Fusionbox'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'django-fusionboxdoc'
+htmlhelp_basename = 'fusionbox-fabric-helpersdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -178,7 +178,7 @@ htmlhelp_basename = 'django-fusionboxdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'django-fusionbox.tex', u'django-fusionbox Documentation',
+  ('index', 'fusionbox-fabric-helpers.tex', u'fusionbox-fabric-helpers Documentation',
    u'Fusionbox Programmers', 'manual'),
 ]
 
@@ -211,12 +211,10 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'django-fusionbox', u'django-fusionbox Documentation',
+    ('index', 'fusionbox-fabric-helpers', u'fusionbox-fabric-helpers Documentation',
      [u'Fusionbox Programmers'], 1)
 ]
 import sys
 import os
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('.'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-import fusionbox.forms
