@@ -57,9 +57,9 @@ def runserver():
     related processes to be started.  Each should be a 2-tuple of directory and
     command to run.
 
-    `runserver_cmd`: `('.', './manage.py runserver')`
-    `celery_cmd`: `('.', './manage.py celery worker -c 2 --autoreload')`
-    `solr_cmd`: `('solr', 'java -jar start.jar')`
+    - ``runserver_cmd``: ``('.', './manage.py runserver')``
+    - ``celery_cmd``: ``('.', './manage.py celery worker -c 2 --autoreload')``
+    - ``solr_cmd``: ``('solr', 'java -jar start.jar')``
     """
     commands = filter(bool, (
         getattr(env, 'runserver_cmd', None),
