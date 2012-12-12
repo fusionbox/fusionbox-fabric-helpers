@@ -32,13 +32,30 @@ def is_local_repo_clean():
 
 def is_repo_clean():
     """
-    Chech if the remote git repository is clean.
+    Check if the remote git repository is clean.
     """
     with settings(warn_only=True):
         return run("git status 2>&1|grep 'nothing to commit' > /dev/null").succeeded
 
 
-def update_with_pull(branch):
+def get_update_function():
+    """
+    Returns the update function which will be used to update the remote site
+    files.  Uses env.transport_method config value.
+    """
+    try:
+        return globals()['update_with_{0}'.format(env.transport_method)]
+    except KeyError:
+        raise NameError('Please set env.transport_method to an accepted value.  Accepted values: {0}'.format(
+            [
+                i[len('update_with_'):]
+                for i in globals().keys()
+                if i.startswith('update_with_')
+            ]
+        ))
+
+
+def update_with_git(branch):
     """
     Updates the remote git repo to ``branch`` using git pull.
 

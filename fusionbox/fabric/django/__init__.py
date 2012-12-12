@@ -3,7 +3,7 @@ import os
 
 from fabric.api import run, env
 
-from fusionbox.fabric.git_helpers import update_with_pull
+from fusionbox.fabric.git_helpers import get_update_function, get_git_branch
 from fusionbox.fabric import virtualenv, files_changed, project_directory
 
 
@@ -15,8 +15,9 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None):
     Set ``env.project_name`` and ``env.project_abbr`` appropriately to use.
     ``env.tld`` defaults to ``.com``
     """
+    update_function = get_update_function()
     with project_directory():
-        version = update_with_pull(branch or 'HEAD')
+        version = update_function(branch or get_git_branch())
         update_pip = pip or files_changed(version, "requirements.txt")
         migrate = migrate or files_changed(version, "*/migrations/* {project_name}/settings.py requirements.txt".format(**env))
         syncdb = syncdb or files_changed(version, "*/settings.py")
