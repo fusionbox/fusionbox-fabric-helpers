@@ -1,3 +1,6 @@
+import subprocess
+import os
+
 from fabric.api import run, env
 
 from fusionbox.fabric.git_helpers import update_git_with_rsync
@@ -43,3 +46,41 @@ def shell():
     with project_directory():
         with virtualenv(env.project_abbr):
             run("bash -")
+
+
+def runserver():
+    """
+    Runs the local django server, starting up celery workers and/or the solr
+    server if needed.
+
+    The following env variables must be present in your fabfile for their
+    related processes to be started.  Each should be a 2-tuple of directory and
+    command to run.
+
+    `runserver_cmd`: `('.', './manage.py runserver')`
+    `celery_cmd`: `('.', './manage.py celery worker -c 2 --autoreload')`
+    `solr_cmd`: `('solr', 'java -jar start.jar')`
+    """
+    commands = filter(bool, (
+        getattr(env, 'runserver_cmd', None),
+        getattr(env, 'celery_cmd', None),
+        getattr(env, 'solr_cmd', None),
+    ))
+    if not commands:
+        print "No commands found.  Please check that you have set the necessary environment variables"
+    processes = []
+    cwd = os.getcwd()
+    for dir, command in commands:
+        processes.append(subprocess.Popen(command, shell=True, cwd=os.path.join(cwd, dir)))
+
+    try:
+        [p.wait() for p in processes]
+    except KeyboardInterrupt:
+        try:
+            [p.terminate() for p in processes]
+            [p.wait() for p in processes]
+        except KeyboardInterrupt:
+            for p in processes:
+                if p.poll() is None:
+                    p.kill()
+            [p.wait() for p in processes]
