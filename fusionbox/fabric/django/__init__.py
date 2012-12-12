@@ -3,7 +3,7 @@ import os
 
 from fabric.api import run, env
 
-from fusionbox.fabric.git_helpers import update_git_with_rsync
+from fusionbox.fabric.git_helpers import update_with_rsync
 from fusionbox.fabric import virtualenv, files_changed, project_directory
 
 
@@ -16,7 +16,7 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None):
     ``env.tld`` defaults to ``.com``
     """
     with project_directory():
-        version = update_git_with_rsync(branch or 'HEAD')
+        version = update_with_rsync(branch or 'HEAD')
         update_pip = pip or files_changed(version, "requirements.txt")
         migrate = migrate or files_changed(version, "*/migrations/* {project_name}/settings.py requirements.txt".format(**env))
         syncdb = syncdb or files_changed(version, "*/settings.py")

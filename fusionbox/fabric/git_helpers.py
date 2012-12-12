@@ -38,7 +38,7 @@ def is_repo_clean():
         return run("git status 2>&1|grep 'nothing to commit' > /dev/null").succeeded
 
 
-def update_git_with_pull(branch):
+def update_with_pull(branch):
     """
     Updates the remote git repo to ``branch`` using git pull.
 
@@ -64,7 +64,7 @@ def update_git_with_pull(branch):
     return remote_head
 
 
-def update_git_with_rsync(branch):
+def update_with_rsync(branch):
     """
     Updates the remote git repo to ``branch`` using rsync.
 
