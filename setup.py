@@ -2,12 +2,13 @@
 from setuptools import setup, find_packages
 
 __doc__ = """
-Fabric helpers
+Fabric helpers.
 """
 
 version = '0.0.1'
 
-setup(name='fusionbox-fabric-helpers',
+setup(
+    name='fusionbox-fabric-helpers',
     version=version,
     description='Fabric Helpers',
     author='Fusionbox programmers',
