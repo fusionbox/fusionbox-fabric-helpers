@@ -3,9 +3,10 @@ from contextlib import contextmanager as _contextmanager
 from fabric.api import prefix, env, local, cd, sudo
 
 
+env.transport_method = 'git'
 env.workon_home = '/var/python-environments'
-
 env.tld = '.com'
+
 
 __doc__ = """
 TODO: Figure out a better way to construct these variables as to minimize the

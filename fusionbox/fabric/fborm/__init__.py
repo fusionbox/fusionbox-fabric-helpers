@@ -1,6 +1,6 @@
 from fabric.api import run, local, puts, cd, env
 
-from fusionbox.fabric.git_helpers import get_git_branch, update_with_git
+from fusionbox.fabric.git_helpers import get_git_branch, get_update_function
 
 
 def get_fborm_folder():
@@ -19,18 +19,24 @@ def correct():
 
 
 def stage():
+    update_function = get_update_function()
     branch = get_git_branch()
+
     local('git pull origin %s' % branch)
     local('git push origin %s' % branch)
+
     with cd('/var/www/%s/' % env.project_name):
-        update_with_git(branch)
+        update_function(branch)
         run("./fbmvc migrate latest")
+
     correct()
 
 
 def deploy():
+    update_function = get_update_function()
+
     with cd('/var/www/%s/' % env.project_name):
-        previous_head = update_with_git('live')
+        previous_head = update_function('live')
         puts("Previous live HEAD: %s" % previous_head)
         run("./fbmvc migrate latest")
 

@@ -1,7 +1,7 @@
 from fabric.api import run, env, cd, puts
 
 from fusionbox.fabric import virtualenv
-from fusionbox.fabric.git_helpers import update_with_git
+from fusionbox.fabric.git_helpers import get_update_function
 from fusionbox.fabric.django import stage
 
 
@@ -9,8 +9,9 @@ stage = stage
 
 
 def deploy():
+    update_function = get_update_function()
     with cd(env.live_project_dir):
-        previous_head = update_with_git("live")
+        previous_head = update_function("live")
         puts("Previous live HEAD: {0}".format(previous_head))
 
         with virtualenv(env.live_virtual_env):
