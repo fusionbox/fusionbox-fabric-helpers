@@ -9,14 +9,14 @@ from fabric.contrib.project import rsync_project
 
 def get_git_branch():
     """
-    Returns the local git branch name
+    Returns the name of the active local git branch.
     """
     return local("git branch --no-color 2> /dev/null|grep '^*' | sed 's/^* //'", capture=True)
 
 
 def has_git_branch(branch):
     """
-    Returns whether or not the branch is available.
+    Checks if the specified branch is available in the remote git repository.
     """
     with settings(warn_only=True):
         return run("git branch --no-color 2> /dev/null|grep '^*\? \+{0}$'".format(branch)).succeeded
@@ -24,7 +24,7 @@ def has_git_branch(branch):
 
 def is_local_repo_clean():
     """
-    Check if the local git repository is clean.
+    Checks if there are uncommitted changes in the local git repository.
     """
     with settings(warn_only=True):
         return local("git status 2>&1|grep 'nothing to commit' > /dev/null").succeeded
@@ -32,7 +32,7 @@ def is_local_repo_clean():
 
 def is_repo_clean():
     """
-    Check if the remote git repository is clean.
+    Checks if there are uncommitted changes in the remote git repository.
     """
     with settings(warn_only=True):
         return run("git status 2>&1|grep 'nothing to commit' > /dev/null").succeeded
@@ -57,7 +57,7 @@ def get_update_function():
 
 def update_with_git(branch):
     """
-    Updates the remote git repo to ``branch`` using git pull.
+    Updates the remote git repository to ``branch`` using git pull.
 
     Returns the commit hash of the remote HEAD before it was updated.
     """
@@ -83,9 +83,9 @@ def update_with_git(branch):
 
 def update_with_rsync(branch):
     """
-    Updates the remote git repo to ``branch`` using rsync.
+    Updates remote site directory to local state of ``branch`` using rsync.
 
-    Returns the commit hash of the remote HEAD before it was updated.
+    Returns the commit hash of remote version before update.
     """
     with settings(warn_only=True):
         remote_head = run("cat static/.git_version.txt")
