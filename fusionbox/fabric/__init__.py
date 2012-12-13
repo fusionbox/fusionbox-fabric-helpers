@@ -3,6 +3,10 @@ from contextlib import contextmanager as _contextmanager
 from fabric.api import prefix, env, local, cd, sudo
 
 
+# Fabric config
+env.forward_agent = True
+
+# Fusionbox helper config
 env.transport_method = 'git'
 env.workon_home = '/var/python-environments'
 env.tld = '.com'
