@@ -8,7 +8,6 @@ def get_fborm_folder():
     return '/var/www/fborm%s/' % ("" if branch == "master" else ":" + branch)
 
 
-@roles('dev')
 def correct():
     run("sudo chgrp -R fusionbox /var/www/%s" % env.project_name)
     run("sudo chmod -R g+rwx /var/www/%s" % env.project_name)
@@ -20,7 +19,6 @@ def correct():
     run("rm -f /var/www/%s/.git/deploy_bundle" % env.project_name)
 
 
-@roles('dev')
 def stage():
     branch = get_git_branch()
     local('git pull origin %s' % branch)
@@ -31,7 +29,6 @@ def stage():
     correct()
 
 
-@roles('live')
 def deploy():
     with cd('/var/www/%s/' % env.project_name):
         previous_head = update_with_git('live')
@@ -40,7 +37,6 @@ def deploy():
         run("./fbmvc migrate latest")
 
 
-@roles('live')
 def rollback(rev):
     with cd('/var/www/%s/' % env.project_name):
         run("git checkout '%s'" % rev)
