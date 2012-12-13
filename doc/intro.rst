@@ -9,9 +9,9 @@ Here is a minimal ``fabfile.py``::
     
     from fusionbox.fabric.django import stage
     
-    env.project_name = 'rjandmakay'
-    env.project_abbr = 'rjandmakay'
-    env.short_name = 'rjandmakay'
+    env.project_name = 'project'
+    env.project_abbr = 'project'
+    env.short_name = 'project'
     
     stage = roles('dev')(stage)
 
