@@ -41,7 +41,8 @@ def virtualenv(dir):
 @_contextmanager
 def project_directory():
     """
-    Context manager to run all commands under a specified python virtual env.
+    Context manager to run all commands within the project root directory.
+    Uses ``env.project_name`` and ``env.tld``.
     """
     with cd('/var/www/{project_name}{tld}'.format(**env)):
         yield
@@ -49,7 +50,7 @@ def project_directory():
 
 def files_changed(version, files):
     """
-    Between version and HEAD, has anything in files changed?
+    Checks if anything in ``files`` has changed between version and local HEAD.
     """
     if not version:
         return True
@@ -60,6 +61,6 @@ def files_changed(version, files):
 
 def supervisor_command(action, name):
     """
-    Perform a command on a supervisor process.
+    Performs a command on a supervisor process.
     """
     sudo('supervisorctl {0} {1}'.format(action, name))
