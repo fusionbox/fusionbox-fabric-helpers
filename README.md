@@ -1,17 +1,17 @@
 # fusionbox-fabric-helpers
 
-Fabric helper functions
-
+Helper functions for working with [fabric](http://fabfile.org/).
 
 ## Contributing
 
-Contributions to `fusionbox-fabric-helpers` are welcome provided they adhere to the following guidelines.
+Contributions to `fusionbox-fabric-helpers` are welcome provided they adhere to
+the following guidelines:
 
-- follows pep8
-- generic and re-usable
-- includes documentation
-- includes test coverage
+- Follows [pep8](http://www.python.org/dev/peps/pep-0008/)
+- Is generic and re-usable
+- Includes documentation
+- Includes test coverage
 
 ## Documentation
 
-http://fusionbox-fabric-helpers.readthedocs.org/
+[http://fusionbox-fabric-helpers.readthedocs.org/](http://fusionbox-fabric-helpers.readthedocs.org/)
