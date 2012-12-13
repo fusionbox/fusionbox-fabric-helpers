@@ -16,7 +16,6 @@ def correct():
     #run("sudo chmod o+w /var/www/%s/public_html/img" % env.project_name)
     run("sudo chmod -R g+rwx %s" % get_fborm_folder())
     run("sudo chmod o+w %s" % get_fborm_folder())
-    run("rm -f /var/www/%s/.git/deploy_bundle" % env.project_name)
 
 
 def stage():
