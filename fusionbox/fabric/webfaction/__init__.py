@@ -1,7 +1,6 @@
 from fabric.api import run, env, cd, puts
 
-from fusionbox.fabric import virtualenv
-from fusionbox.fabric.git_helpers import get_update_function
+from fusionbox.fabric import virtualenv, get_update_function
 from fusionbox.fabric.django import stage
 
 

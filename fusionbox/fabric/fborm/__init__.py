@@ -1,6 +1,6 @@
 from fabric.api import run, local, puts, cd, env
 
-from fusionbox.fabric.git_helpers import get_git_branch, get_update_function
+from fusionbox.fabric import get_git_branch, get_update_function
 
 
 def get_fborm_folder():

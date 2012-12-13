@@ -1,10 +1,9 @@
-import subprocess
 import os
+import subprocess
 
 from fabric.api import run, env
 
-from fusionbox.fabric.git_helpers import get_update_function, get_git_branch
-from fusionbox.fabric import virtualenv, files_changed, project_directory
+from fusionbox.fabric import virtualenv, files_changed, project_directory, get_update_function, get_git_branch
 
 
 def stage(pip=False, migrate=False, syncdb=False, branch=None):
