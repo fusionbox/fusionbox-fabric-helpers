@@ -38,23 +38,6 @@ def is_repo_clean():
         return run("git status 2>&1|grep 'nothing to commit' > /dev/null").succeeded
 
 
-def get_update_function():
-    """
-    Returns the update function which will be used to update the remote site
-    files.  Uses env.transport_method config value.
-    """
-    try:
-        return globals()['update_with_{0}'.format(env.transport_method)]
-    except KeyError:
-        raise NameError('Please set env.transport_method to an accepted value.  Accepted values: {0}'.format(
-            [
-                i[len('update_with_'):]
-                for i in globals().keys()
-                if i.startswith('update_with_')
-            ]
-        ))
-
-
 def update_with_git(branch):
     """
     Updates the remote git repository to ``branch`` using git pull.
@@ -103,3 +86,18 @@ def update_with_rsync(branch):
     finally:
         shutil.rmtree(loc)
     return remote_head
+
+
+def get_update_function():
+    """
+    Returns the update function which will be used to update the remote site
+    files.  Uses env.transport_method config value.
+    """
+    try:
+        return globals()['update_with_{0}'.format(env.transport_method)]
+    except KeyError:
+        raise NameError('Please set env.transport_method to an accepted value.  Accepted values: {0}'.format([
+            i[len('update_with_'):]
+            for i in globals().keys()
+            if i.startswith('update_with_')
+        ]))
