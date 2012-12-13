@@ -7,8 +7,6 @@ Core
 .. automodule:: fusionbox.fabric
   :members:
 
-.. automodule:: fusionbox.fabric.git_helpers
-  :members:
 
 Django
 ------
