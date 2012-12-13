@@ -5,13 +5,14 @@ Fabric helpers used by the development team at Fusionbox_ for server deployment.
 
 Here is a minimal ``fabfile.py``::
 
-    from fabric.api import env, roles
+    from fabric.api import roles
     
+    from fusionbox.fabric import fb_env
     from fusionbox.fabric.django import stage
     
-    env.project_name = 'project'
-    env.project_abbr = 'project'
-    env.short_name = 'project'
+    fb_env.project_name = 'rjandmakay'
+    fb_env.project_abbr = 'rjandmakay'
+    fb_env.short_name = 'rjandmakay'
     
     stage = roles('dev')(stage)
 
