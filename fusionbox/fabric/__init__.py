@@ -18,27 +18,37 @@ env.roledefs = {
     'dev': ['dev.fusionbox.com'],
 }
 
+
 # Default fusionbox helper config
-env.transport_method = 'git'
-env.workon_home = '/var/python-environments'
-env.tld = '.com'
+class _FBEnv(dict):
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+fb_env = _FBEnv()
+fb_env.transport_method = 'git'
+fb_env.workon_home = '/var/python-environments'
+fb_env.tld = '.com'
 
 
-__doc__ = """
-TODO: Figure out a better way to construct these variables as to minimize the
-number of environment variables that must be declared while still allowing for
-highly detailed configuration.
-
-Dev server
-----------
-project_directory - /var/www/{project_name}.{tld}/
-virtual_env - /var/python-environments/{abbr}/bin/activate
-vassals_file - /etc/vassals/{abbr}.ini
-
-Production Server can have fundamentally different values for these.... (see webfaction)
-
-Example env configs:
-"""
+# TODO: Figure out a better way to construct these variables as to minimize the
+# number of environment variables that must be declared while still allowing for
+# highly detailed configuration.
+#
+# Dev server
+# ----------
+# project_directory - /var/www/{project_name}.{tld}/
+# virtual_env - /var/python-environments/{abbr}/bin/activate
+# vassals_file - /etc/vassals/{abbr}.ini
+#
+# Production Server can have fundamentally different values for these.... (see webfaction)
+#
+# Example env configs:
 
 
 ##|
@@ -49,7 +59,7 @@ def virtualenv(dir):
     """
     Context manager to run all commands under the python virtual env at ``dir``.
     """
-    with prefix('source {workon_home}/{dir}/bin/activate'.format(dir=dir, **env)):
+    with prefix('source {workon_home}/{dir}/bin/activate'.format(dir=dir, **fb_env)):
         yield
 
 
@@ -57,9 +67,9 @@ def virtualenv(dir):
 def project_directory():
     """
     Context manager to run all commands within the project root directory.
-    Uses ``env.project_name`` and ``env.tld``.
+    Uses ``fb_env.project_name`` and ``fb_env.tld``.
     """
-    with cd('/var/www/{project_name}{tld}'.format(**env)):
+    with cd('/var/www/{project_name}{tld}'.format(**fb_env)):
         yield
 
 
@@ -171,12 +181,12 @@ def update_with_rsync(branch):
 def get_update_function():
     """
     Returns the update function which will be used to update the remote site
-    files.  Uses env.transport_method config value.
+    files.  Uses fb_env.transport_method config value.
     """
     try:
-        return globals()['update_with_{0}'.format(env.transport_method)]
+        return globals()['update_with_{0}'.format(fb_env.transport_method)]
     except KeyError:
-        raise NameError('Please set env.transport_method to an accepted value.  Accepted values: {0}'.format([
+        raise NameError('Please set fb_env.transport_method to an accepted value.  Accepted values: {0}'.format([
             i[len('update_with_'):]
             for i in globals().keys()
             if i.startswith('update_with_')
