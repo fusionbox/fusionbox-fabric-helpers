@@ -5,11 +5,6 @@ from fusionbox.fabric.git_helpers import update_with_git
 from fusionbox.fabric.django import stage
 
 
-def correct():
-    run("sudo chgrp -R fusionbox /var/www/{0}".format(env.full_name))
-    run("sudo chmod -R g+rwx /var/www/{0}".format(env.full_name))
-
-
 stage = stage
 
 
