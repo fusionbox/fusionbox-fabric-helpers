@@ -33,7 +33,6 @@ def deploy():
     with cd('/var/www/%s/' % env.project_name):
         previous_head = update_with_git('live')
         puts("Previous live HEAD: %s" % previous_head)
-        update_with_git('live')
         run("./fbmvc migrate latest")
 
 
