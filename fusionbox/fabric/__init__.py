@@ -5,6 +5,9 @@ from fabric.api import prefix, env, local, cd, sudo
 
 # Fabric config
 env.forward_agent = True
+env.roledefs = {
+    'dev': ['dev.fusionbox.com'],
+}
 
 # Fusionbox helper config
 env.transport_method = 'git'
