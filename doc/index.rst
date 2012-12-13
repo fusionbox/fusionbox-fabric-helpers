@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to fusionbox-fabric-helpers's documentation!
-============================================
+====================================================
 
 Contents:
 
