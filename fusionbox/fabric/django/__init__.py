@@ -1,9 +1,38 @@
+from termcolor import colored
+from contextlib import contextmanager
 import os
 import subprocess
 
 from fabric.api import run
 
 from fusionbox.fabric import virtualenv, files_changed, project_directory, get_update_function, get_git_branch, fb_env
+
+
+@contextmanager
+def run_subprocesses(cmds):
+    """
+    Returns a list of tuples of command, Popen object.  During __close__, the list
+    of processes is polled for unfinished processes and attempts to close them.
+    """
+    processes = []
+    cwd = os.getcwd()
+    for dir, cmd in cmds:
+        p = subprocess.Popen(cmd, shell=True,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             cwd=os.path.join(cwd, dir))
+        processes.append((cmd, p))
+    try:
+        yield processes
+    finally:
+        # We clean up any subprocesses that haven't finished with a SIGTERM
+        procs_to_term = filter(lambda p: p[1].poll() is None, processes)
+        try:
+            [p.terminate() for _, p in procs_to_term]
+            [p.wait() for _, p in procs_to_term]
+        except KeyboardInterrupt:
+            # User issued an interrupt, send SIGKILL to end immediately
+            [p.kill() for _, p in procs_to_term if p.poll() is None]
+            [p.wait() for _, p in procs_to_term]
 
 
 def stage(pip=False, migrate=False, syncdb=False, branch=None):
@@ -75,19 +104,30 @@ def runserver():
     ))
     if not commands:
         print "No commands found.  Please check that you have set the necessary environment variables"
-    processes = []
-    cwd = os.getcwd()
-    for dir, command in commands:
-        processes.append(subprocess.Popen(command, shell=True, cwd=os.path.join(cwd, dir)))
 
-    try:
-        [p.wait() for p in processes]
-    except KeyboardInterrupt:
-        try:
-            [p.terminate() for p in processes]
-            [p.wait() for p in processes]
-        except KeyboardInterrupt:
-            for p in processes:
-                if p.poll() is None:
-                    p.kill()
-            [p.wait() for p in processes]
+    def read_message(fd):
+        ret = ''
+        while True:
+            out = fd.read(1)
+            ret += out
+            if out == '':
+                break
+        return ret
+
+    message_prefix = colored('[{command}]', 'blue', attrs=['bold'])
+    error_prefix = colored('[{command}]', 'white', 'on_red', attrs=['bold'])
+    output = u'{prefix} {message}'
+
+    with run_subprocesses(commands) as processes:
+        for cmd, p in processes:
+            while p.poll() is None:
+                message = read_message(p.stdout)
+                error = read_message(p.stderr)
+                if message:
+                    print (output.format(
+                        prefix=message_prefix.format(command=cmd),
+                        message=message))
+                if error:
+                    print (output.format(
+                        prefix=error_prefix.format(command=cmd),
+                        message=error))
