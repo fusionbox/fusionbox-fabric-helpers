@@ -1,4 +1,4 @@
-from fabric.api import run, local, puts, cd, roles, env
+from fabric.api import run, local, puts, cd, env
 
 from fusionbox.fabric.git_helpers import get_git_branch, update_with_git
 
