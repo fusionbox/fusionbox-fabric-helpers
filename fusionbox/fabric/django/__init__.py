@@ -3,9 +3,66 @@ from contextlib import contextmanager
 import os
 import subprocess
 
-from fabric.api import run
+from fabric.api import run, cd, puts
 
-from fusionbox.fabric import virtualenv, files_changed, project_directory, get_update_function, get_git_branch, fb_env
+from fusionbox.fabric import fb_env
+from fusionbox.fabric.git import get_git_branch
+from fusionbox.fabric.update import get_update_function
+from fusionbox.fabric.utils import virtualenv, files_changed
+
+
+def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
+    """
+    Updates the remote site files to your local branch head, collects static
+    files, migrates, and installs pip requirements if necessary.
+    """
+    update_function = get_update_function()
+    branch = branch or get_git_branch()
+
+    project_name = fb_env.role(role, 'project_name')
+    project_loc = fb_env.role(role, 'project_loc')
+    virtualenv_loc = fb_env.role(role, 'virtualenv_loc')
+    restart_cmd = fb_env.role(role, 'restart_cmd')
+
+    with cd(project_loc):
+        previous_head = update_function(branch)
+        puts('Previous remote HEAD: {0}'.format(previous_head))
+
+        update_pip = pip or files_changed(previous_head, 'requirements.txt')
+        migrate = migrate or files_changed(previous_head, '*/migrations/* {project_name}/settings.py requirements.txt'.format(project_name=project_name))
+        syncdb = syncdb or files_changed(previous_head, '*/settings.py')
+
+        with virtualenv(virtualenv_loc):
+            if update_pip:
+                run('pip install -r ./requirements.txt')
+
+            if syncdb:
+                run('python manage.py syncdb')
+
+            if migrate:
+                run('python manage.py backupdb')
+                run('python manage.py migrate')
+
+            run('python manage.py collectstatic --noinput')
+
+        run(restart_cmd)
+
+
+def deploy():
+    """
+    Same as stage, but always uses the live branch and live config settings,
+    migrates, and pip installs.
+    """
+    stage(pip=True, migrate=True, syncdb=True, branch='live', role='live')
+
+
+def shell():
+    """
+    Fires up a shell on the live server.
+    """
+    with cd(fb_env.live_project_loc):
+        with virtualenv(fb_env.live_virtualenv_loc):
+            run('bash -')
 
 
 @contextmanager
@@ -34,55 +91,6 @@ def run_subprocesses(cmds):
             # User issued an interrupt, send SIGKILL to end immediately
             [p.kill() for _, p in procs_to_term if p.poll() is None]
             [p.wait() for _, p in procs_to_term]
-
-
-def stage(pip=False, migrate=False, syncdb=False, branch=None):
-    """
-    Updates the remote git version to your local branch head, collects static
-    files, migrates, and installs pip requirements if necessary.
-
-    Set ``fb_env.project_name`` and ``fb_env.project_abbr`` appropriately to use.
-    ``fb_env.tld`` defaults to ``.com``
-    """
-    update_function = get_update_function()
-
-    with project_directory():
-        version = update_function(branch or get_git_branch())
-
-        update_pip = pip or files_changed(version, "requirements.txt")
-        migrate = migrate or files_changed(version, "*/migrations/* {project_name}/settings.py requirements.txt".format(**fb_env))
-        syncdb = syncdb or files_changed(version, "*/settings.py")
-
-        with virtualenv(fb_env.project_abbr):
-            if update_pip:
-                run("pip install -r ./requirements.txt")
-
-            if syncdb:
-                run("python manage.py syncdb")
-
-            if migrate:
-                run("python manage.py backupdb")
-                run("python manage.py migrate")
-
-            run("python manage.py collectstatic --noinput")
-
-        run("sudo touch /etc/vassals/{project_abbr}.ini".format(**fb_env))
-
-
-def deploy():
-    """
-    Same as stage, but always uses the live branch, migrates, and pip installs.
-    """
-    stage(True, True, True, "live")
-
-
-def shell():
-    """
-    Fires up a shell on the remote server.
-    """
-    with project_directory():
-        with virtualenv(fb_env.project_abbr):
-            run("bash -")
 
 
 def runserver():
