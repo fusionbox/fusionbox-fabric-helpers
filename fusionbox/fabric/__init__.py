@@ -11,6 +11,8 @@ from fabric.api import (
 from fabric.contrib.console import confirm
 from fabric.contrib.project import rsync_project
 
+from fusionbox.fabric.utils import Env
+
 
 # Default fabric config
 env.forward_agent = True
@@ -20,17 +22,7 @@ env.roledefs = {
 
 
 # Default fusionbox helper config
-class _FBEnv(dict):
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(key)
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-fb_env = _FBEnv()
+fb_env = Env()
 fb_env.transport_method = 'git'
 fb_env.workon_home = '/var/python-environments'
 fb_env.tld = '.com'
