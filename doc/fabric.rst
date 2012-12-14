@@ -20,3 +20,24 @@ FBORM
 
 .. automodule:: fusionbox.fabric.fborm
   :members:
+
+
+Utilities
+---------
+
+.. automodule:: fusionbox.fabric.utils
+  :members:
+
+
+Git utilities
+-------------
+
+.. automodule:: fusionbox.fabric.git
+  :members:
+
+
+Update methods
+--------------
+
+.. automodule:: fusionbox.fabric.update
+  :members:
