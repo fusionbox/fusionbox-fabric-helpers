@@ -20,6 +20,7 @@ class Env(object):
         'dev_project_dir': '{dev_project_name}{dev_tld}',
         'dev_project_loc': '{dev_web_home}/{dev_project_dir}',
         'dev_virtualenv_loc': '{dev_workon_home}/{dev_virtualenv}',
+        'dev_restart_cmd': 'sudo touch /etc/vassals/{dev_project_name}.ini',
 
         # Live-specific defaults
         'live_project_name': '{project_name}',
@@ -30,6 +31,7 @@ class Env(object):
         'live_project_dir': '{live_project_name}{live_tld}',
         'live_project_loc': '{live_web_home}/{live_project_dir}',
         'live_virtualenv_loc': '{live_workon_home}/{live_virtualenv}',
+        'live_restart_cmd': 'sudo touch /etc/vassals/{live_project_name}.ini',
     }
 
     def __init__(self):
@@ -50,3 +52,6 @@ class Env(object):
 
     def _format(self, f):
         return self._formatter.vformat(f, None, self)
+
+    def role(self, role, name):
+        return getattr(self, role + '_' + name)

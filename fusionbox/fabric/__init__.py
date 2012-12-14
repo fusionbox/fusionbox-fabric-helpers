@@ -4,7 +4,7 @@ from contextlib import contextmanager as _contextmanager
 from StringIO import StringIO
 
 from fabric.api import (
-    abort, cd, env, local,
+    abort, env, local,
     prefix, put, run, settings,
     sudo,
 )
@@ -28,21 +28,6 @@ fb_env.workon_home = '/var/python-environments'
 fb_env.tld = '.com'
 
 
-# TODO: Figure out a better way to construct these variables as to minimize the
-# number of environment variables that must be declared while still allowing for
-# highly detailed configuration.
-#
-# Dev server
-# ----------
-# project_directory - /var/www/{project_name}.{tld}/
-# virtual_env - /var/python-environments/{abbr}/bin/activate
-# vassals_file - /etc/vassals/{abbr}.ini
-#
-# Production Server can have fundamentally different values for these.... (see webfaction)
-#
-# Example env configs:
-
-
 ##|
 ##| General helpers
 ##|
@@ -51,17 +36,7 @@ def virtualenv(dir):
     """
     Context manager to run all commands under the python virtual env at ``dir``.
     """
-    with prefix('source {workon_home}/{dir}/bin/activate'.format(dir=dir, **fb_env)):
-        yield
-
-
-@_contextmanager
-def project_directory():
-    """
-    Context manager to run all commands within the project root directory.
-    Uses ``fb_env.project_name`` and ``fb_env.tld``.
-    """
-    with cd('/var/www/{project_name}{tld}'.format(**fb_env)):
+    with prefix('source {0}/bin/activate'.format(dir)):
         yield
 
 

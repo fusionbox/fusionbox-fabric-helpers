@@ -1,12 +1,15 @@
 import os
 import subprocess
 
-from fabric.api import run
+from fabric.api import run, cd
 
-from fusionbox.fabric import virtualenv, files_changed, project_directory, get_update_function, get_git_branch, fb_env
+from fusionbox.fabric import virtualenv, files_changed, get_update_function, get_git_branch, fb_env
 
 
-def stage(pip=False, migrate=False, syncdb=False, branch=None):
+def stage(
+    pip=False, migrate=False, syncdb=False,
+    branch=None, role='dev',
+):
     """
     Updates the remote git version to your local branch head, collects static
     files, migrates, and installs pip requirements if necessary.
@@ -15,43 +18,55 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None):
     ``fb_env.tld`` defaults to ``.com``
     """
     update_function = get_update_function()
+    branch = branch or get_git_branch()
 
-    with project_directory():
-        version = update_function(branch or get_git_branch())
+    project_name = fb_env.role(role, 'project_name')
+    project_loc = fb_env.role(role, 'project_loc')
+    virtualenv_loc = fb_env.role(role, 'virtualenv_loc')
+    restart_cmd = fb_env.role(role, 'restart_cmd')
 
-        update_pip = pip or files_changed(version, "requirements.txt")
-        migrate = migrate or files_changed(version, "*/migrations/* {project_name}/settings.py requirements.txt".format(**fb_env))
-        syncdb = syncdb or files_changed(version, "*/settings.py")
+    with cd(project_loc):
+        version = update_function(branch)
 
-        with virtualenv(fb_env.project_abbr):
+        update_pip = pip or files_changed(version, 'requirements.txt')
+        migrate = migrate or files_changed(version, '*/migrations/* {project_name}/settings.py requirements.txt'.format(project_name=project_name))
+        syncdb = syncdb or files_changed(version, '*/settings.py')
+
+        with virtualenv(virtualenv_loc):
             if update_pip:
-                run("pip install -r ./requirements.txt")
+                run('pip install -r ./requirements.txt')
 
             if syncdb:
-                run("python manage.py syncdb")
+                run('python manage.py syncdb')
 
             if migrate:
-                run("python manage.py backupdb")
-                run("python manage.py migrate")
+                run('python manage.py backupdb')
+                run('python manage.py migrate')
 
-            run("python manage.py collectstatic --noinput")
+            run('python manage.py collectstatic --noinput')
 
-        run("sudo touch /etc/vassals/{project_abbr}.ini".format(**fb_env))
+        run(restart_cmd)
 
 
 def deploy():
     """
     Same as stage, but always uses the live branch, migrates, and pip installs.
     """
-    stage(True, True, True, "live")
+    stage(
+        pip=True,
+        migrate=True,
+        syncdb=True,
+        branch='live',
+        role='live',
+    )
 
 
 def shell():
     """
     Fires up a shell on the remote server.
     """
-    with project_directory():
-        with virtualenv(fb_env.project_abbr):
+    with cd(fb_env.live_project_loc):
+        with virtualenv(fb_env.live_virtualenv_loc):
             run("bash -")
 
 
