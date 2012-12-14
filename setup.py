@@ -35,6 +35,6 @@ setup(
         'Topic :: System :: Software Distribution',
         'Topic :: System :: Systems Administration',
     ],
-    install_requires=['fabric>=1.4'],
+    install_requires=['fabric>=1.4', 'termcolor==1.1.0'],
     requires=['fabric'],
 )
