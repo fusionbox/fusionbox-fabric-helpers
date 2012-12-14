@@ -67,7 +67,7 @@ def shell():
     """
     with cd(fb_env.live_project_loc):
         with virtualenv(fb_env.live_virtualenv_loc):
-            run("bash -")
+            run('bash -')
 
 
 def runserver():
