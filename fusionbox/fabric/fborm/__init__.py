@@ -1,6 +1,8 @@
-from fabric.api import run, local, puts, cd
+from fabric.api import run, puts, cd
 
-from fusionbox.fabric import get_git_branch, get_update_function, fb_env
+from fusionbox.fabric import fb_env
+from fusionbox.fabric.git import get_git_branch
+from fusionbox.fabric.update import get_update_function
 
 
 def get_fborm_folder():
@@ -8,7 +10,7 @@ def get_fborm_folder():
     Gets the location of the fborm folder on the dev server.
     """
     branch = get_git_branch()
-    return '/{0}/fborm{1}/'.format(
+    return '{0}/fborm{1}/'.format(
         fb_env.dev_web_home,
         '' if branch == 'master' else ':' + branch,
     )
@@ -20,8 +22,8 @@ def correct():
 
     NOTE: This is a hack...there I said it.
     """
-    run('sudo chgrp -R fusionbox /var/www/%s' % fb_env.dev_project_name)
-    run('sudo chmod -R g+rwx /var/www/%s' % fb_env.dev_project_name)
+    run('sudo chgrp -R fusionbox /var/www/%s' % fb_env.dev_project_dir)
+    run('sudo chmod -R g+rwx /var/www/%s' % fb_env.dev_project_dir)
     run('sudo chmod -R g+rwx %s' % get_fborm_folder())
     run('sudo chmod o+w %s' % get_fborm_folder())
 
@@ -34,9 +36,6 @@ def stage(branch=None, role='dev'):
     branch = branch or get_git_branch()
 
     project_loc = fb_env.role(role, 'project_loc')
-
-    local('git pull origin {0}'.format(branch))
-    local('git push origin {0}'.format(branch))
 
     with cd(project_loc):
         previous_head = update_function(branch)
