@@ -11,6 +11,9 @@ class Env(object):
     a stack overflow.
     """
     DEFAULTS = {
+        # Global defaults
+        'virtualenv': '{project_name}',
+
         # Dev-specific defaults
         'dev_project_name': '{project_name}',
         'dev_tld': '{tld}',
