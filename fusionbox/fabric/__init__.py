@@ -3,11 +3,9 @@ import tempfile
 from contextlib import contextmanager as _contextmanager
 from StringIO import StringIO
 
-from fabric.api import (
-    abort, env, local,
-    prefix, put, run, settings,
-    sudo,
-)
+from fabric.api import (abort, env, local,
+                        prefix, put, run, settings,
+                        sudo)
 from fabric.contrib.console import confirm
 from fabric.contrib.project import rsync_project
 
