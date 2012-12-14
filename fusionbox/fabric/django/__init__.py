@@ -16,12 +16,13 @@ def run_subprocesses(cmds):
     """
     processes = []
     cwd = os.getcwd()
-    for dir, cmd in cmds:
-        p = subprocess.Popen(cmd, shell=True,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             cwd=os.path.join(cwd, dir))
-        processes.append((cmd, p))
     try:
+        for dir, cmd in cmds:
+            p = subprocess.Popen(cmd, shell=True,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 cwd=os.path.join(cwd, dir))
+            processes.append((cmd, p))
         yield processes
     finally:
         # We clean up any subprocesses that haven't finished with a SIGTERM
