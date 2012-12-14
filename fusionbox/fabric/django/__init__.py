@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import os
 import subprocess
 
-from fabric.api import run, cd
+from fabric.api import run, cd, puts
 
 from fusionbox.fabric import fb_env
 from fusionbox.fabric.git import get_git_branch
@@ -25,11 +25,12 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
     restart_cmd = fb_env.role(role, 'restart_cmd')
 
     with cd(project_loc):
-        version = update_function(branch)
+        previous_head = update_function(branch)
+        puts('Previous remote HEAD: {0}'.format(previous_head))
 
-        update_pip = pip or files_changed(version, 'requirements.txt')
-        migrate = migrate or files_changed(version, '*/migrations/* {project_name}/settings.py requirements.txt'.format(project_name=project_name))
-        syncdb = syncdb or files_changed(version, '*/settings.py')
+        update_pip = pip or files_changed(previous_head, 'requirements.txt')
+        migrate = migrate or files_changed(previous_head, '*/migrations/* {project_name}/settings.py requirements.txt'.format(project_name=project_name))
+        syncdb = syncdb or files_changed(previous_head, '*/settings.py')
 
         with virtualenv(virtualenv_loc):
             if update_pip:
