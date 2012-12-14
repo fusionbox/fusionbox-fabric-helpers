@@ -3,13 +3,13 @@ import subprocess
 
 from fabric.api import run, cd
 
-from fusionbox.fabric import virtualenv, files_changed, get_update_function, get_git_branch, fb_env
+from fusionbox.fabric import fb_env
+from fusionbox.fabric.git import get_git_branch
+from fusionbox.fabric.update import get_update_function
+from fusionbox.fabric.utils import virtualenv, files_changed
 
 
-def stage(
-    pip=False, migrate=False, syncdb=False,
-    branch=None, role='dev',
-):
+def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
     """
     Updates the remote git version to your local branch head, collects static
     files, migrates, and installs pip requirements if necessary.
@@ -52,13 +52,7 @@ def deploy():
     """
     Same as stage, but always uses the live branch, migrates, and pip installs.
     """
-    stage(
-        pip=True,
-        migrate=True,
-        syncdb=True,
-        branch='live',
-        role='live',
-    )
+    stage(pip=True, migrate=True, syncdb=True, branch='live', role='live')
 
 
 def shell():
