@@ -13,11 +13,8 @@ from fusionbox.fabric.utils import virtualenv, files_changed
 
 def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
     """
-    Updates the remote git version to your local branch head, collects static
+    Updates the remote site files to your local branch head, collects static
     files, migrates, and installs pip requirements if necessary.
-
-    Set ``fb_env.project_name`` and ``fb_env.project_abbr`` appropriately to use.
-    ``fb_env.tld`` defaults to ``.com``
     """
     update_function = get_update_function()
     branch = branch or get_git_branch()
@@ -52,14 +49,15 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
 
 def deploy():
     """
-    Same as stage, but always uses the live branch, migrates, and pip installs.
+    Same as stage, but always uses the live branch and live config settings,
+    migrates, and pip installs.
     """
     stage(pip=True, migrate=True, syncdb=True, branch='live', role='live')
 
 
 def shell():
     """
-    Fires up a shell on the remote server.
+    Fires up a shell on the live server.
     """
     with cd(fb_env.live_project_loc):
         with virtualenv(fb_env.live_virtualenv_loc):

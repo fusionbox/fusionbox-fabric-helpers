@@ -38,7 +38,7 @@ def update_with_git(branch):
 
 def update_with_rsync(branch):
     """
-    Updates remote site directory to local state of ``branch`` using rsync.
+    Updates remote site files to local state of ``branch`` using rsync.
 
     Returns the commit hash of remote version before update.
     """
@@ -63,7 +63,7 @@ def update_with_rsync(branch):
 def get_update_function():
     """
     Returns the update function which will be used to update the remote site
-    files.  Uses fb_env.transport_method config value.
+    files based on the ``fb_env.transport_method`` config setting.
     """
     try:
         return globals()['update_with_{0}'.format(fb_env.transport_method)]
