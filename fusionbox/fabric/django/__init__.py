@@ -140,3 +140,33 @@ def runserver():
                     print (output.format(
                         prefix=error_prefix.format(command=cmd),
                         message=error))
+
+
+def obfuscate():
+    """
+    Compile all source files to byte code, then remove them.
+    """
+    run('python -m compileall .')
+    run("find -type f -name '*.py' -not -name 'settings_local.py' -not -name 'manage.py' -delete")
+
+
+def obfuscate_decorator(role):
+    """
+    Given a fabric action, this will run obfuscate() after it with config
+    settings for the specified role.
+    """
+    def decorator(old_fn):
+        def new_fn(*args, **kwargs):
+            retval = old_fn(*args, **kwargs)
+
+            project_loc = fb_env.role(role, 'project_loc')
+            virtualenv_loc = fb_env.role(role, 'virtualenv_loc')
+
+            with cd(project_loc):
+                # Use the venv so we have the right python version
+                with virtualenv(virtualenv_loc):
+                    obfuscate()
+
+            return retval
+        return new_fn
+    return decorator
