@@ -42,8 +42,8 @@ servers as follows::
 The `project_name` is also automatically (not automagically!!) used to build
 the paths to the python virtual environment::
 
-    paths on dev:  /var/python-environments/bar
-    paths on live: /home/foo/virtualenvs/bar
+    path on dev:  /var/python-environments/bar
+    path on live: /home/foo/virtualenvs/bar
 
 Any setting which is generated automatically can be manually overridden.  If
 you wanted to manually set the absolute paths to the project, you could do

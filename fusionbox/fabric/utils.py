@@ -15,29 +15,27 @@ class Env(object):
     """
     DEFAULTS = {
         # Global defaults
+        'project_dir': '{project_name}{tld}',
+        'site_app': '{project_name}',
         'virtualenv': '{project_name}',
         'vassal': '{project_name}',
 
         # Dev-specific defaults
-        'dev_project_name': '{project_name}',
-        'dev_tld': '{tld}',
         'dev_web_home': '{web_home}',
         'dev_virtualenv': '{virtualenv}',
         'dev_vassal': '{vassal}',
         'dev_workon_home': '{workon_home}',
-        'dev_project_dir': '{dev_project_name}{dev_tld}',
+        'dev_project_dir': '{project_dir}',
         'dev_project_loc': '{dev_web_home}/{dev_project_dir}',
         'dev_virtualenv_loc': '{dev_workon_home}/{dev_virtualenv}',
         'dev_restart_cmd': 'sudo touch /etc/vassals/{dev_vassal}.ini',
 
         # Live-specific defaults
-        'live_project_name': '{project_name}',
-        'live_tld': '{tld}',
         'live_web_home': '{web_home}',
         'live_virtualenv': '{virtualenv}',
         'live_vassal': '{vassal}',
         'live_workon_home': '{workon_home}',
-        'live_project_dir': '{live_project_name}{live_tld}',
+        'live_project_dir': '{project_dir}',
         'live_project_loc': '{live_web_home}/{live_project_dir}',
         'live_virtualenv_loc': '{live_workon_home}/{live_virtualenv}',
         'live_restart_cmd': 'sudo touch /etc/vassals/{live_vassal}.ini',
