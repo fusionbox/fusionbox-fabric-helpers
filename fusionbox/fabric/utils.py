@@ -60,6 +60,8 @@ class Env(object):
         return getattr(self, key)
 
     def _format(self, f):
+        # Use a string formatter instance so we can use any object that defines
+        # __getitem__
         return self._formatter.vformat(f, None, self)
 
     def role(self, role, name):
