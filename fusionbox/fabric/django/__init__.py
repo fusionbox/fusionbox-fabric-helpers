@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import os
 import subprocess
 
-from fabric.api import run, cd, puts
+from fabric.api import run, cd, puts, local, get, env
 
 from fusionbox.fabric import fb_env
 from fusionbox.fabric.git import get_git_branch
@@ -63,6 +63,60 @@ def shell():
     with cd(fb_env.live_project_loc):
         with virtualenv(fb_env.live_virtualenv_loc):
             run('bash -')
+
+
+def sync_db(role):
+    """
+    Downloads the latest remote (live or dev) database backup and loads it on your local
+    machine.
+    """
+    remote_project_loc = fb_env.role(role, 'project_loc')
+    remote_virtualenv_loc = fb_env.role(role, 'virtualenv_loc')
+    remote_backups_dir = fb_env.role(role, 'backups_dir')
+
+    local('python manage.py backupdb')
+
+    with cd(remote_project_loc):
+        with virtualenv(remote_virtualenv_loc):
+            run('python manage.py backupdb --backup-name=sync --no-owner --no-privileges')
+
+            # Download
+            get(
+                '{remote_backups_dir}/*-sync.*.gz'.format(
+                    remote_backups_dir=remote_backups_dir,
+                ),
+                './{local_backups_dir}/'.format(
+                    local_backups_dir=fb_env.local_backups_dir,
+                ),
+            )
+
+    local('python manage.py restoredb --backup-name=sync')
+
+
+sync_with_live_db = lambda: sync_db('live')
+sync_with_dev_db = lambda: sync_db('dev')
+
+
+def sync_media(role):
+    """
+    Synchronizes the latest remote (live or dev) media directory with your
+    local media directory.
+    """
+    remote = env.roledefs[role]
+    remote_media_loc = fb_env.role(role, 'media_loc') + '/'
+
+    # Rsync has weird syntax for the target directory
+    local_media_loc = './' + fb_env.local_media_dir
+
+    local('rsync -avz --progress {remote}:{remote_media_loc} {local_media_loc}'.format(
+        remote=remote,
+        remote_media_loc=remote_media_loc,
+        local_media_loc=local_media_loc,
+    ))
+
+
+sync_with_live_media = lambda: sync_media('live')
+sync_with_dev_media = lambda: sync_media('dev')
 
 
 @contextmanager

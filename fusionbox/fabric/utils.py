@@ -17,8 +17,10 @@ class Env(object):
         # Global defaults
         'virtualenv': '{project_name}',
         'vassal': '{project_name}',
+        'backups_dir': 'backups',
+        'media_dir': 'media',
 
-        # Dev-specific defaults
+        # Dev defaults
         'dev_project_name': '{project_name}',
         'dev_tld': '{tld}',
         'dev_web_home': '{web_home}',
@@ -30,7 +32,12 @@ class Env(object):
         'dev_virtualenv_loc': '{dev_workon_home}/{dev_virtualenv}',
         'dev_restart_cmd': 'sudo touch /etc/vassals/{dev_vassal}.ini',
 
-        # Live-specific defaults
+        'dev_backups_dir': '{backups_dir}',
+
+        'dev_media_dir': '{media_dir}',
+        'dev_media_loc': '{dev_project_loc}/{dev_media_dir}',
+
+        # Live defaults
         'live_project_name': '{project_name}',
         'live_tld': '{tld}',
         'live_web_home': '{web_home}',
@@ -41,6 +48,15 @@ class Env(object):
         'live_project_loc': '{live_web_home}/{live_project_dir}',
         'live_virtualenv_loc': '{live_workon_home}/{live_virtualenv}',
         'live_restart_cmd': 'sudo touch /etc/vassals/{live_vassal}.ini',
+
+        'live_backups_dir': '{backups_dir}',
+
+        'live_media_dir': '{media_dir}',
+        'live_media_loc': '{live_project_loc}/{live_media_dir}',
+
+        # Local defaults
+        'local_backups_dir': '{backups_dir}',
+        'local_media_dir': '{media_dir}',
     }
 
     def __init__(self):
