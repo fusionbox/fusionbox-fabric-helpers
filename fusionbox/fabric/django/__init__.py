@@ -122,8 +122,9 @@ sync_with_dev_media = lambda: sync_media('dev')
 @contextmanager
 def run_subprocesses(cmds):
     """
-    Returns a list of tuples of command, Popen object.  During __close__, the list
-    of processes is polled for unfinished processes and attempts to close them.
+    Returns a list of tuples of command, Popen object.  During __close__, the
+    list of processes is polled for unfinished processes and attempts to close
+    them.
     """
     processes = []
     cwd = os.getcwd()
