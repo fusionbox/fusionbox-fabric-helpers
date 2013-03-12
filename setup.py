@@ -35,6 +35,13 @@ setup(
         'Topic :: System :: Software Distribution',
         'Topic :: System :: Systems Administration',
     ],
-    install_requires=['fabric>=1.4', 'termcolor==1.1.0'],
+    install_requires=[
+        'fabric>=1.4',
+        'termcolor==1.1.0',
+        'django-backupdb==0.2',
+    ],
+    dependency_links=[
+        'https://github.com/fusionbox/django-backupdb/tarball/ec2701e7dae67f8759c232492e524f77695cef2a#egg=django_backupdb-0.2',
+    ],
     requires=['fabric'],
 )
