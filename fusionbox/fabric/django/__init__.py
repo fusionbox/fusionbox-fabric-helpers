@@ -78,7 +78,7 @@ def sync_db(role):
 
     with cd(remote_project_loc):
         with virtualenv(remote_virtualenv_loc):
-            run('python manage.py backupdb --backup-name=sync --no-owner --no-privileges')
+            run('python manage.py backupdb --backup-name=sync --pg-dump-options="--no-owner --no-privileges"')
 
             # Download
             get(
