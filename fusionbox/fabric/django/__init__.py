@@ -102,7 +102,7 @@ def sync_media(role):
     Synchronizes the latest remote (live or dev) media directory with your
     local media directory.
     """
-    remote = env.roledefs[role]
+    remote = env.roledefs[role][0]
     remote_media_loc = fb_env.role(role, 'media_loc') + '/'
 
     # Rsync has weird syntax for the target directory
