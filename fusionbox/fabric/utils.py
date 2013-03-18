@@ -33,7 +33,6 @@ class Env(object):
         'dev_restart_cmd': 'sudo touch /etc/vassals/{dev_vassal}.ini',
 
         'dev_backups_dir': '{backups_dir}',
-
         'dev_media_dir': '{media_dir}',
         'dev_media_loc': '{dev_project_loc}/{dev_media_dir}',
 
@@ -50,7 +49,6 @@ class Env(object):
         'live_restart_cmd': 'sudo touch /etc/vassals/{live_vassal}.ini',
 
         'live_backups_dir': '{backups_dir}',
-
         'live_media_dir': '{media_dir}',
         'live_media_loc': '{live_project_loc}/{live_media_dir}',
 
