@@ -20,11 +20,11 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
     branch = branch or get_git_branch()
 
     project_name = fb_env.role(role, 'project_name')
-    project_loc = fb_env.role(role, 'project_loc')
-    virtualenv_loc = fb_env.role(role, 'virtualenv_loc')
+    project_path = fb_env.role(role, 'project_path')
+    virtualenv_path = fb_env.role(role, 'virtualenv_path')
     restart_cmd = fb_env.role(role, 'restart_cmd')
 
-    with cd(project_loc):
+    with cd(project_path):
         previous_head = update_function(branch)
         puts('Previous remote HEAD: {0}'.format(previous_head))
 
@@ -32,7 +32,7 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
         migrate = migrate or files_changed(previous_head, '*/migrations/* {project_name}/settings.py requirements.txt'.format(project_name=project_name))
         syncdb = syncdb or files_changed(previous_head, '*/settings.py')
 
-        with virtualenv(virtualenv_loc):
+        with virtualenv(virtualenv_path):
             if update_pip:
                 run('pip install -r ./requirements.txt')
 
@@ -70,14 +70,14 @@ def sync_db(role):
     Downloads the latest remote (live or dev) database backup and loads it on your local
     machine.
     """
-    remote_project_loc = fb_env.role(role, 'project_loc')
-    remote_virtualenv_loc = fb_env.role(role, 'virtualenv_loc')
+    remote_project_path = fb_env.role(role, 'project_path')
+    remote_virtualenv_path = fb_env.role(role, 'virtualenv_path')
     remote_backups_dir = fb_env.role(role, 'backups_dir')
 
     local('python manage.py backupdb')
 
-    with cd(remote_project_loc):
-        with virtualenv(remote_virtualenv_loc):
+    with cd(remote_project_path):
+        with virtualenv(remote_virtualenv_path):
             run('python manage.py backupdb --backup-name=sync --pg-dump-options="--no-owner --no-privileges"')
 
             # Download
@@ -103,14 +103,14 @@ def sync_media(role):
     local media directory.
     """
     remote = env.roledefs[role][0]
-    remote_media_loc = fb_env.role(role, 'media_loc') + '/'
+    remote_media_path = fb_env.role(role, 'media_path') + '/'
 
     # Rsync has weird syntax for the target directory
     local_media_dir = './' + fb_env.local_media_dir
 
-    local('rsync -avz --progress {remote}:{remote_media_loc} {local_media_dir}'.format(
+    local('rsync -avz --progress {remote}:{remote_media_path} {local_media_dir}'.format(
         remote=remote,
-        remote_media_loc=remote_media_loc,
+        remote_media_path=remote_media_path,
         local_media_dir=local_media_dir,
     ))
 
@@ -214,12 +214,12 @@ def obfuscate_decorator(role):
         def new_fn(*args, **kwargs):
             retval = old_fn(*args, **kwargs)
 
-            project_loc = fb_env.role(role, 'project_loc')
-            virtualenv_loc = fb_env.role(role, 'virtualenv_loc')
+            project_path = fb_env.role(role, 'project_path')
+            virtualenv_path = fb_env.role(role, 'virtualenv_path')
 
-            with cd(project_loc):
+            with cd(project_path):
                 # Use the venv so we have the right python version
-                with virtualenv(virtualenv_loc):
+                with virtualenv(virtualenv_path):
                     obfuscate()
 
             return retval

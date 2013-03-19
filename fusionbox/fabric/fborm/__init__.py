@@ -12,9 +12,9 @@ def stage(branch=None, role='dev'):
     update_function = get_update_function()
     branch = branch or get_git_branch()
 
-    project_loc = fb_env.role(role, 'project_loc')
+    project_path = fb_env.role(role, 'project_path')
 
-    with cd(project_loc):
+    with cd(project_path):
         previous_head = update_function(branch)
         puts('Previous remote HEAD: {0}'.format(previous_head))
         run('./fbmvc dbdump')
