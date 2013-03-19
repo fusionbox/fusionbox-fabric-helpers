@@ -1,6 +1,6 @@
 from fabric.api import env
 
-from fusionbox.fabric.utils import Env
+from fusionbox.fabric.config import Env
 
 # Default fabric config
 env.forward_agent = True

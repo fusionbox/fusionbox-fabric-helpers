@@ -1,7 +1,7 @@
 from copy import copy
 import unittest
 
-from fusionbox.fabric.utils import Env
+from fusionbox.fabric.config import Env
 
 
 class EnvTestCase(unittest.TestCase):
