@@ -106,12 +106,12 @@ def sync_media(role):
     remote_media_loc = fb_env.role(role, 'media_loc') + '/'
 
     # Rsync has weird syntax for the target directory
-    local_media_loc = './' + fb_env.local_media_dir
+    local_media_dir = './' + fb_env.local_media_dir
 
-    local('rsync -avz --progress {remote}:{remote_media_loc} {local_media_loc}'.format(
+    local('rsync -avz --progress {remote}:{remote_media_loc} {local_media_dir}'.format(
         remote=remote,
         remote_media_loc=remote_media_loc,
-        local_media_loc=local_media_loc,
+        local_media_dir=local_media_dir,
     ))
 
 
