@@ -30,5 +30,5 @@ def shell():
     """
     Fires up a shell on the live server.
     """
-    with cd(fb_env.live_project_loc):
+    with cd(fb_env.live_project_path):
         run('bash -')

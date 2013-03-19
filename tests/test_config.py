@@ -30,13 +30,13 @@ class EnvTestCase(unittest.TestCase):
             'dev_vassal': 'sammich',
             'dev_workon_home': '/var/python-environments',
             'dev_project_dir': 'sammich.com',
-            'dev_project_loc': '/var/www/sammich.com',
-            'dev_virtualenv_loc': '/var/python-environments/sammich',
+            'dev_project_path': '/var/www/sammich.com',
+            'dev_virtualenv_path': '/var/python-environments/sammich',
             'dev_restart_cmd': 'sudo touch /etc/vassals/sammich.ini',
 
             'dev_backups_dir': 'backups',
             'dev_media_dir': 'media',
-            'dev_media_loc': '/var/www/sammich.com/media',
+            'dev_media_path': '/var/www/sammich.com/media',
 
             'live_project_name': 'sammich',
             'live_tld': '.com',
@@ -45,13 +45,13 @@ class EnvTestCase(unittest.TestCase):
             'live_vassal': 'sammich',
             'live_workon_home': '/var/python-environments',
             'live_project_dir': 'sammich.com',
-            'live_project_loc': '/var/www/sammich.com',
-            'live_virtualenv_loc': '/var/python-environments/sammich',
+            'live_project_path': '/var/www/sammich.com',
+            'live_virtualenv_path': '/var/python-environments/sammich',
             'live_restart_cmd': 'sudo touch /etc/vassals/sammich.ini',
 
             'live_backups_dir': 'backups',
             'live_media_dir': 'media',
-            'live_media_loc': '/var/www/sammich.com/media',
+            'live_media_path': '/var/www/sammich.com/media',
 
             'local_backups_dir': 'backups',
             'local_media_dir': 'media',
@@ -83,18 +83,18 @@ class EnvTestCase(unittest.TestCase):
         self.defaults.update({
             'dev_virtualenv': 'wrap',
             'dev_vassal': 'sandwich',
-            'dev_virtualenv_loc': '/var/python-environments/wrap',
+            'dev_virtualenv_path': '/var/python-environments/wrap',
             'dev_restart_cmd': 'sudo touch /etc/vassals/sandwich.ini',
 
             'live_tld': '.net',
             'live_web_home': '/home/mctest/webapps/sammich',
             'live_workon_home': '/home/mctest/virtualenvs',
             'live_project_dir': 'sammich.net',
-            'live_project_loc': '/home/mctest/webapps/sammich/sammich.net',
-            'live_virtualenv_loc': '/home/mctest/virtualenvs/sammich',
+            'live_project_path': '/home/mctest/webapps/sammich/sammich.net',
+            'live_virtualenv_path': '/home/mctest/virtualenvs/sammich',
             'live_restart_cmd': '/home/mctest/webapps/sammich/apache2/bin/restart',
 
-            'live_media_loc': '/home/mctest/webapps/sammich/sammich.net/media',
+            'live_media_path': '/home/mctest/webapps/sammich/sammich.net/media',
         })
 
         for k, v in self.defaults.iteritems():

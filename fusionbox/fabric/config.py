@@ -31,13 +31,13 @@ class Env(object):
         'dev_vassal': '{vassal}',
         'dev_workon_home': '{workon_home}',
         'dev_project_dir': '{dev_project_name}{dev_tld}',
-        'dev_project_loc': '{dev_web_home}/{dev_project_dir}',
-        'dev_virtualenv_loc': '{dev_workon_home}/{dev_virtualenv}',
+        'dev_project_path': '{dev_web_home}/{dev_project_dir}',
+        'dev_virtualenv_path': '{dev_workon_home}/{dev_virtualenv}',
         'dev_restart_cmd': 'sudo touch /etc/vassals/{dev_vassal}.ini',
 
         'dev_backups_dir': '{backups_dir}',
         'dev_media_dir': '{media_dir}',
-        'dev_media_loc': '{dev_project_loc}/{dev_media_dir}',
+        'dev_media_path': '{dev_project_path}/{dev_media_dir}',
 
         # Live defaults
         'live_project_name': '{project_name}',
@@ -47,13 +47,13 @@ class Env(object):
         'live_vassal': '{vassal}',
         'live_workon_home': '{workon_home}',
         'live_project_dir': '{live_project_name}{live_tld}',
-        'live_project_loc': '{live_web_home}/{live_project_dir}',
-        'live_virtualenv_loc': '{live_workon_home}/{live_virtualenv}',
+        'live_project_path': '{live_web_home}/{live_project_dir}',
+        'live_virtualenv_path': '{live_workon_home}/{live_virtualenv}',
         'live_restart_cmd': 'sudo touch /etc/vassals/{live_vassal}.ini',
 
         'live_backups_dir': '{backups_dir}',
         'live_media_dir': '{media_dir}',
-        'live_media_loc': '{live_project_loc}/{live_media_dir}',
+        'live_media_path': '{live_project_path}/{live_media_dir}',
 
         # Local defaults
         'local_backups_dir': '{backups_dir}',

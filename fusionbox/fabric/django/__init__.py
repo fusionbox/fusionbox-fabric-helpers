@@ -60,8 +60,8 @@ def shell():
     """
     Fires up a shell on the live server.
     """
-    with cd(fb_env.live_project_loc):
-        with virtualenv(fb_env.live_virtualenv_loc):
+    with cd(fb_env.live_project_path):
+        with virtualenv(fb_env.live_virtualenv_path):
             run('bash -')
 
 
