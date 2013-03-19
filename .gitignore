@@ -2,6 +2,7 @@
 *.swp
 doc/_build
 *.egg-info/
+*.egg
 build/
 dist/
 test_project/backup
