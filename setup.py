@@ -35,6 +35,11 @@ setup(
         'Topic :: System :: Software Distribution',
         'Topic :: System :: Systems Administration',
     ],
+    test_suite='nose.collector',
+    setup_requires=[
+        'nose==1.2.1',
+        'mock==1.0.1',
+    ],
     install_requires=[
         'fabric>=1.4',
         'termcolor==1.1.0',
