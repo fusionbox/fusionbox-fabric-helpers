@@ -11,10 +11,3 @@ env.roledefs = {
 
 # Default fusionbox helper config
 fb_env = Env()
-
-fb_env.transport_method = 'git'
-
-fb_env.web_home = '/var/www'
-fb_env.workon_home = '/var/python-environments'
-
-fb_env.tld = '.com'

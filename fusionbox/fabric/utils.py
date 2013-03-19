@@ -15,10 +15,16 @@ class Env(object):
     """
     DEFAULTS = {
         # Global defaults
-        'virtualenv': '{project_name}',
-        'vassal': '{project_name}',
+        'transport_method': 'git',
+        'tld': '.com',
+
+        'web_home': '/var/www',
+        'workon_home': '/var/python-environments',
         'backups_dir': 'backups',
         'media_dir': 'media',
+
+        'virtualenv': '{project_name}',
+        'vassal': '{project_name}',
 
         # Dev defaults
         'dev_project_name': '{project_name}',

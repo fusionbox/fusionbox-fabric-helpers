@@ -1,5 +1,4 @@
 from copy import copy
-from mock import MagicMock, patch
 import unittest
 
 from fusionbox.fabric.utils import Env
@@ -11,15 +10,18 @@ class EnvTestCase(unittest.TestCase):
 
         self.env = Env()
         self.env.project_name = 'sammich'
-        self.env.tld = '.com'
-        self.env.web_home = '/var/www'
-        self.env.workon_home = '/var/python-environments'
 
         self.defaults = {
-            'virtualenv': 'sammich',
-            'vassal': 'sammich',
+            'transport_method': 'git',
+            'tld': '.com',
+
+            'web_home': '/var/www',
+            'workon_home': '/var/python-environments',
             'backups_dir': 'backups',
             'media_dir': 'media',
+
+            'virtualenv': 'sammich',
+            'vassal': 'sammich',
 
             'dev_project_name': 'sammich',
             'dev_tld': '.com',
