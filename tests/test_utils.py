@@ -1,3 +1,4 @@
+from copy import copy
 from mock import MagicMock, patch
 import unittest
 
@@ -96,6 +97,16 @@ class EnvTestCase(unittest.TestCase):
 
         for k, v in self.defaults.iteritems():
             self.assertEqual(getattr(self.env, k), v)
+
+    def test_default_values_that_reference_each_other_cause_stack_overflow(self):
+        class CircularEnv(Env):
+            DEFAULTS = copy(Env.DEFAULTS)
+            DEFAULTS['ouroboros_head'] = '{ouroboros_tail}'
+            DEFAULTS['ouroboros_tail'] = '{ouroboros_head}'
+
+        ouroboros = CircularEnv()
+
+        self.assertRaises(RuntimeError, lambda: ouroboros.ouroboros_head)
 
     def test_role_looks_up_attributes_with_a_certain_prefix(self):
         self.env.dev_vassal = 'sandwich'
