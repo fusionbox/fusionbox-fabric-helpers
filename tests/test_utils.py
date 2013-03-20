@@ -6,7 +6,7 @@ from fusionbox.fabric.utils import virtualenv, supervisor_command
 
 class VirtualenvTestCase(unittest.TestCase):
     def test_virtualenv_runs_commands_with_the_prefix_contextmanager(self):
-        with patch('fabric.api.prefix') as mock_prefix:
+        with patch('fusionbox.fabric.utils.prefix') as mock_prefix:
             with virtualenv('/var/virtualenvs/test'):
                 pass
 
@@ -15,7 +15,7 @@ class VirtualenvTestCase(unittest.TestCase):
 
 class SupervisorCommandTestCase(unittest.TestCase):
     def test_supervisor_command_runs_a_remote_supervisorctl_command(self):
-        with patch('fabric.api.sudo') as mock_sudo:
+        with patch('fusionbox.fabric.utils.sudo') as mock_sudo:
             supervisor_command('stop', 'texting_and_driving')
 
         mock_sudo.assert_called_with('supervisorctl stop texting_and_driving')
