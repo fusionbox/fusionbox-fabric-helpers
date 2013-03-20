@@ -1,6 +1,6 @@
 from contextlib import contextmanager as _contextmanager
 
-from fabric.api import local, prefix, sudo
+from fabric.api import prefix, local, sudo
 
 
 @_contextmanager
