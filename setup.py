@@ -5,7 +5,7 @@ __doc__ = """
 Fabric helpers.
 """
 
-version = '0.3.3'
+version = '0.3.4'
 
 setup(
     name='fusionbox-fabric-helpers',
@@ -43,10 +43,10 @@ setup(
     install_requires=[
         'fabric>=1.4',
         'termcolor==1.1.0',
-        'django-backupdb==0.4.2',
+        'django-backupdb==0.4.3',
     ],
     dependency_links=[
-        'https://github.com/fusionbox/django-backupdb/tarball/v0.4.2#egg=django_backupdb-0.4.2',
+        'https://github.com/fusionbox/django-backupdb/tarball/v0.4.3#egg=django_backupdb-0.4.3',
     ],
     requires=['fabric'],
 )
