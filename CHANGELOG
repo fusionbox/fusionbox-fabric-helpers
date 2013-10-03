@@ -1,0 +1,9 @@
+0.3.6 - 2013.10.03
+-----
+
+Add support for getting local branch while running on travis-ci
+
+0.3.5 - 2013.10.02
+-----
+
+Initial pypi release.
