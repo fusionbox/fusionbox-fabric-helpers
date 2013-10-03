@@ -6,7 +6,7 @@ __doc__ = """
 Fabric helpers.
 """
 
-version = (0, 3, 6, 'final')
+version = (0, 3, 7, 'final')
 
 
 def get_version():
