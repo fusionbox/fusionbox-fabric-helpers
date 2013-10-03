@@ -5,8 +5,8 @@ def get_git_branch():
     """
     Returns the name of the active local git branch.
     """
-    if local("echo $TRAVIS"):
-        return local("echo $TRAVIS_BRANCH")
+    if local("echo $TRAVIS", capture=True):
+        return local("echo $TRAVIS_BRANCH", capture=True)
     return local("git branch --no-color 2> /dev/null|grep '^*' | sed 's/^* //'", capture=True)
 
 
