@@ -11,7 +11,7 @@ from fusionbox.fabric.update import get_update_function
 from fusionbox.fabric.utils import virtualenv, files_changed
 
 
-def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
+def stage(pip=False, migrate=False, syncdb=False, branch=None, post_update=None, role='dev'):
     """
     Updates the remote site files to your local branch head, collects static
     files, migrates, and installs pip requirements if necessary.
@@ -27,6 +27,10 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
     with cd(project_path):
         previous_head = update_function(branch)
         puts('Previous remote HEAD: {0}'.format(previous_head))
+
+        if post_update:
+            puts('Running post-update hook...')
+            post_update()
 
         update_pip = pip or files_changed(previous_head, 'requirements.txt')
         migrate = migrate or files_changed(previous_head, '*/migrations/* {project_name}/settings.py requirements.txt'.format(project_name=project_name))
@@ -48,12 +52,12 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, role='dev'):
         run(restart_cmd)
 
 
-def deploy():
+def deploy(post_update=None):
     """
     Same as stage, but always uses the live branch and live config settings,
     migrates, and pip installs.
     """
-    stage(pip=True, migrate=True, syncdb=True, branch='live', role='live')
+    stage(pip=True, migrate=True, syncdb=True, branch='live', post_update=post_update, role='live')
 
 
 def shell():
