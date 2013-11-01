@@ -1,12 +1,17 @@
+0.4.0 - 2013.11.01
+-----
+
+Add support for a post-update callback to django stage and deploy tasks.
+
 0.3.6 - 2013.10.03
 -----
 
-Fix support for getting local branch while running on travis-ci
+Fix support for getting local branch while running on travis-ci.
 
 0.3.6 - 2013.10.03
 -----
 
-Add support for getting local branch while running on travis-ci
+Add support for getting local branch while running on travis-ci.
 
 0.3.5 - 2013.10.02
 -----
