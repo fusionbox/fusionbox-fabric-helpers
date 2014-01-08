@@ -40,11 +40,13 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, post_update=None,
             if update_pip:
                 run('pip install -r ./requirements.txt')
 
+            if syncdb or migrate:
+                run('python manage.py backupdb')
+
             if syncdb:
                 run('python manage.py syncdb')
 
             if migrate:
-                run('python manage.py backupdb')
                 run('python manage.py migrate')
 
             run('python manage.py collectstatic --noinput')
