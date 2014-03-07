@@ -23,15 +23,12 @@ def update_with_git(branch):
             abort("Remote repo dirty, aborting...")
         run("git stash")
 
-    # If branch is not on server, get it
-    if not has_git_branch(branch):
-        run("git fetch origin {0}".format(branch))
-        run("git fetch")
+    run("git fetch")
 
     # Update and get previous remote HEAD
     run("git checkout '{0}'".format(branch))
     remote_head = run("git rev-list --no-merges --max-count=1 HEAD")
-    run("git pull origin {0}".format(branch))
+    run("git reset --hard origin/{0}".format(branch))
 
     return remote_head
 
