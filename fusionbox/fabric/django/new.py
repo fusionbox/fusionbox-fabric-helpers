@@ -250,11 +250,11 @@ def deploy(branch='origin/live'):
 
 @task
 @roles('dev')
-def stage(qad=True):
+def stage(branch='HEAD', qad=True):
     """
     Deploy the current branch to the dev server
     """
-    gitref = get_git_ref('HEAD')
+    gitref = get_git_ref(branch)
     return push(gitref, qad)
 
 
