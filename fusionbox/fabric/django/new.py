@@ -162,12 +162,12 @@ def push(gitref, qad):
     """
     directory = execute(push_code, gitref)['<local-only>']
 
-    if qad:  # Try to guess if we need to pip install
+    if qad:  # TODO: Try to guess if we need to pip install
         should_pip_install = False
     else:
         should_pip_install = True
 
-    if qad:  # Try to guess if we need to migrate
+    if qad:  # TODO: Try to guess if we need to migrate
         should_migrate = False
     else:
         should_migrate = True
