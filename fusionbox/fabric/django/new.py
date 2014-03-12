@@ -253,10 +253,12 @@ def reload_last_push():
     This should be idem-potent.
     """
     directory = get_latest_src_dir()
-    pip_install(directory)
-    migrate(directory)
-    collectstatic(directory)
-    reload_uwsgi(directory)
+    with cd_project():
+        with cd(directory):
+            pip_install()
+            migrate()
+            collectstatic()
+            reload_uwsgi()
 
 
 @task
