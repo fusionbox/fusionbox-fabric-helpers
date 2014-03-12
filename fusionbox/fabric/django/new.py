@@ -245,7 +245,7 @@ def deploy(branch='origin/live'):
     """
     local('git fetch --all')
     gitref = get_git_ref(branch)
-    return push(gitref, quad=False)
+    return push(gitref, qad=False)
 
 
 @task
