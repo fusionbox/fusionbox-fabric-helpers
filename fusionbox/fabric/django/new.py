@@ -3,14 +3,15 @@ import re
 import contextlib
 import tempfile
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from fabric.api import task, run, execute, env, local, sudo
-from fabric.context_managers import cd, prefix
+from fabric.api import task, run, env, local, sudo, settings
+from fabric.context_managers import cd, prefix, hide
 from fabric.decorators import roles
 from fabric.contrib.project import rsync_project
 from fabric.sftp import SFTP
 from fabric.colors import red
+from fabric.utils import abort
 
 __all__ = ['stage', 'deploy', 'fetch_dbdump', 'cleanup', 'reload_last_push',
            'rollback']
@@ -53,10 +54,27 @@ def atomic_src_update():
     directory = '{src}.{timestamp}'.format(
         src=SRC_DIR, timestamp=timestamp)
 
-    run('ln -ns {directory} {lock}'.format(
-        directory=directory,
-        lock=DEPLOYMENT_LOCK
-        ))
+    if env.force:
+        run('rm -f {lock}'.format(lock=DEPLOYMENT_LOCK))
+
+    with settings(warn_only=True):
+        result = run('ln -ns {directory} {lock}'.format(
+            directory=directory,
+            lock=DEPLOYMENT_LOCK
+            ))
+
+    if result.failed:
+        with hide('running', 'stdout', 'stderr'):
+            current_time = int(run('date +%s'))
+            locked_at = int(run('stat -c "%Y" {lock}'.format(lock=DEPLOYMENT_LOCK)))
+            locked_for = timedelta(seconds=current_time-locked_at)
+            abort(red(
+                "Someone else is holding the deployment lock (For {locked_for})."
+                " Rerun with force=1 to kick them off (could be dangerous).".format(
+                    locked_for=locked_for
+                ),
+                bold=True
+            ))
 
     try:
         yield directory
@@ -239,10 +257,11 @@ def cleanup(size=1):
 
 @task
 @roles('live')
-def deploy(branch='origin/live'):
+def deploy(branch='origin/live', force=False):
     """
     Deploy the live branch to the live server
     """
+    env.force = force
     local('git fetch --all')
     gitref = get_git_ref(branch)
     return push(gitref, qad=False)
@@ -250,10 +269,11 @@ def deploy(branch='origin/live'):
 
 @task
 @roles('dev')
-def stage(branch='HEAD', qad=True):
+def stage(branch='HEAD', qad=True, force=False):
     """
     Deploy the current branch to the dev server
     """
+    env.force = force
     gitref = get_git_ref(branch)
     return push(gitref, qad)
 
