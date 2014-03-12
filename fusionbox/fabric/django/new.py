@@ -33,8 +33,10 @@ def in_project(directory=None):
 @contextlib.contextmanager
 def with_tmp_dir():
     directory = tempfile.mkdtemp()
-    yield directory
-    shutil.rmtree(directory)
+    try:
+        yield directory
+    finally:
+        shutil.rmtree(directory)
 
 @contextlib.contextmanager
 def with_venv():
