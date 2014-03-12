@@ -54,7 +54,7 @@ def get_project_dir(position=1):
             path = env.cwd.rstrip('/') + '/' + path.lstrip('/')
         glob_pattern = os.path.join(path, 'project.*')
         project_directories = sorted(sftp.glob(glob_pattern))
-    return project_directories[position - 1]
+    return project_directories[-position]
 
 
 def get_git_ref(name):
