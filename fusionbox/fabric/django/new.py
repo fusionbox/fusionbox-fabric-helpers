@@ -18,10 +18,12 @@ __all__ = ['stage', 'deploy', 'fetch_dbdump', 'cleanup', 'reload_last_push',
 
 PROJECTS_PATH = '/var/www/'
 DEFAULT_HISTORY_SIZE = 3
+DEPLOYMENT_LOCK = 'deployment.lock'
+SRC_DIR = 'src'
 
 
 @contextlib.contextmanager
-def in_project(directory=None):
+def cd_project(directory=None):
     path = os.path.join(PROJECTS_PATH, env.project_name)
     if directory is not None:
         path = os.path.join(path, directory)
@@ -30,7 +32,7 @@ def in_project(directory=None):
 
 
 @contextlib.contextmanager
-def with_tmp_dir():
+def use_tmp_dir():
     directory = tempfile.mkdtemp()
     try:
         yield directory
@@ -38,15 +40,36 @@ def with_tmp_dir():
         shutil.rmtree(directory)
 
 @contextlib.contextmanager
-def with_venv():
+def use_virtualenv():
     activate_script = os.path.join(PROJECTS_PATH, env.project_name,
         'virtualenv', 'bin', 'activate')
     with prefix('source {}'.format(activate_script)):
         yield
 
 
-def get_project_dir(position=1):
-    with in_project() as path:
+@contextlib.contextmanager
+def atomic_src_update():
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')
+    directory = '{src}.{timestamp}'.format(
+        src=SRC_DIR, timestamp=timestamp)
+
+    run('ln -ns {directory} {lock}'.format(
+        directory=directory,
+        lock=DEPLOYMENT_LOCK
+        ))
+
+    try:
+        yield directory
+    except:
+        run('unlink {lock}'.format(lock=DEPLOYMENT_LOCK))
+        raise
+    else:
+        run('mv -f -T {lock} {src}'.format(lock=DEPLOYMENT_LOCK, src=SRC_DIR))
+
+
+
+def get_latest_src_dir(position=1):
+    with cd_project() as path:
         sftp = SFTP(env.host_string)
         # Honor cd()
         if not os.path.isabs(path):
@@ -70,49 +93,40 @@ def get_django_version():
     return tuple(int(g) for g in m.groups())
 
 
-@task
-def push_code(gitref):
+def upload_source(gitref, directory):
     """
     Push the new code into a new directory
     """
-    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')
-    dest_dir = 'project.{}'.format(timestamp)
 
-    with with_tmp_dir() as local_dir:
-
+    with use_tmp_dir() as local_dir:
         local('git archive {ref} | tar x -C {dir}'.format(ref=gitref, dir=local_dir))
 
-        with in_project() as project_dir:
-            # Add trailing slash for rsync
-            if not local_dir.endswith('/'):
-                local_dir += '/'
+        # Add trailing slash for rsync
+        if not local_dir.endswith('/'):
+            local_dir += '/'
 
-            previous = get_project_dir()
+        previous = get_latest_src_dir()
 
-            rsync_project(
-                local_dir=local_dir,
-                remote_dir=os.path.join(project_dir, dest_dir),
-                delete=True,
-                extra_opts='--link-dest={}'.format(previous),
-            )
+        rsync_project(
+            local_dir=local_dir,
+            remote_dir=os.path.join(env.cwd, directory),
+            delete=True,
+            extra_opts='--link-dest={}'.format(previous),
+        )
 
-            run('cp -l environment {new}/.env'.format(new=dest_dir))
-            run('chmod go+rx {}'.format(dest_dir))
-
-    return dest_dir
+    run('cp -l environment {new}/.env'.format(new=directory))
+    run('chmod go+rx {}'.format(directory))
 
 
-@task
 def pip_install(directory):
     """
     Install requirements in this directory
     """
-    with with_venv():
-        with in_project(directory):
+    with use_virtualenv():
+        with cd_project(directory):
             run('pip install -r requirements.txt')
 
 
-@task
 def migrate(directory):
     """
     Migrate the database in this directory:
@@ -121,8 +135,8 @@ def migrate(directory):
         * If this is using Django >= 1.7:
             * python manage.py migrate
     """
-    with with_venv():
-        with in_project(directory):
+    with use_virtualenv():
+        with cd_project(directory):
             run('python manage.py backupdb')
 
             if get_django_version() < (1, 7):
@@ -131,27 +145,26 @@ def migrate(directory):
                 run('python manage.py migrate --noinput')
 
 
-@task
-def reload_code(directory):
+def collectstatic(directory):
+    with use_virtualenv():
+        with cd_project(directory):
+            run('python manage.py collectstatic --noinput')
+
+
+def reload_uwsgi(directory):
     """
     Update the project's code symlink to the specified directory
     And then touches the vassal
     """
-    with with_venv():
-        with in_project(directory):
-            run('python manage.py collectstatic --noinput')
-    with in_project():
-        run('ln -sfn {} project'.format(directory.rstrip('/')))
     sudo('touch /etc/vassals/{name}.ini'.format(name=env.vassal_name))
 
 
-@task
 def cleanup_history(size):
-    with in_project():
+    with cd_project():
         # just "rm -rf" does nothing
-        run('ls -d -1 project.* | head -n -{:d} | xargs rm -rf'.format(size+1))
+        run('ls -d -1 {src}.* | head -n -{size:d} | xargs rm -rf'.format(src=SRC_DIR, size=size+1))
 
-@task
+
 def push(gitref, qad):
     """
     Push the last changes
@@ -160,27 +173,29 @@ def push(gitref, qad):
       * Doesn't pip install if the requirements.txt didn't change
       * Doesn't migrate if the migrations file didn't change
     """
-    directory = execute(push_code, gitref)['<local-only>']
+    with cd_project():
+        with atomic_src_update() as directory:
+            upload_source(gitref, directory)
 
-    if qad:  # TODO: Try to guess if we need to pip install
-        should_pip_install = False
-    else:
-        should_pip_install = True
+            if qad:  # TODO: Try to guess if we need to pip install
+                should_pip_install = False
+            else:
+                should_pip_install = True
 
-    if qad:  # TODO: Try to guess if we need to migrate
-        should_migrate = False
-    else:
-        should_migrate = True
+            if qad:  # TODO: Try to guess if we need to migrate
+                should_migrate = False
+            else:
+                should_migrate = True
 
 
-    if should_pip_install:
-        execute(pip_install, directory)
-    if should_migrate:
-        execute(migrate, directory)
+            if should_pip_install:
+                pip_install(directory)
+            if should_migrate:
+                migrate(directory)
 
-    execute(reload_code, directory)
-
-    execute(cleanup_history, DEFAULT_HISTORY_SIZE)
+            collectstatic(directory)
+        reload_uwsgi(directory)
+        cleanup_history(DEFAULT_HISTORY_SIZE)
 
 
 @task
@@ -189,10 +204,11 @@ def reload_last_push():
     Reload the code (pip install, migrate, and touch the vassal).
     This should be idem-potent.
     """
-    directory = get_project_dir()
-    execute(pip_install, directory)
-    execute(migrate, directory)
-    execute(reload_code, directory)
+    directory = get_latest_src_dir()
+    pip_install(directory)
+    migrate(directory)
+    collectstatic(directory)
+    reload_uwsgi(directory)
 
 
 @task
@@ -218,7 +234,7 @@ def cleanup(size=1):
     size = int(size)
     if size < 1:
         raise ValueError("We need at list one version")
-    execute(cleanup_history, size)
+    return cleanup_history(size)
 
 
 @task
@@ -229,7 +245,7 @@ def deploy(branch='origin/live'):
     """
     local('git fetch --all')
     gitref = get_git_ref(branch)
-    execute(push, gitref, qad=False)
+    return push(gitref, quad=False)
 
 
 @task
@@ -238,11 +254,8 @@ def stage(qad=True):
     """
     Deploy the current branch to the dev server
     """
-    if qad:
-        gitref = get_git_ref('HEAD')
-        execute(push, gitref, qad=True)
-    else:
-        execute(reload_last_push)
+    gitref = get_git_ref('HEAD')
+    return push(gitref, qad)
 
 
 @task
