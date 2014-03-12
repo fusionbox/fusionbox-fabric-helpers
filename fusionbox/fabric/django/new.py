@@ -3,12 +3,14 @@ import re
 import contextlib
 import tempfile
 import shutil
+import getpass
 from datetime import datetime, timedelta
 
 from fabric.api import task, run, env, local, sudo, settings
 from fabric.context_managers import cd, prefix, hide
 from fabric.decorators import roles
 from fabric.contrib.project import rsync_project
+from fabric.contrib.files import append
 from fabric.sftp import SFTP
 from fabric.colors import red
 from fabric.utils import abort
@@ -20,6 +22,7 @@ __all__ = ['stage', 'deploy', 'fetch_dbdump', 'cleanup', 'reload_last_push',
 PROJECTS_PATH = '/var/www/'
 DEFAULT_HISTORY_SIZE = 3
 DEPLOYMENT_LOCK = 'deployment.lock'
+DEPLOY_LOG = 'deploy.log'
 SRC_DIR = 'src'
 
 
@@ -213,6 +216,11 @@ def push(gitref, qad):
 
             collectstatic(directory)
         reload_uwsgi(directory)
+
+        with hide('running', 'stdout'):
+            server_time = run('TZ=America/Denver date')
+        append(DEPLOY_LOG, '{date}: {user} {dir} {ref}'.format(date=server_time, ref=gitref, dir=directory, user=getpass.getuser()))
+
         cleanup_history(DEFAULT_HISTORY_SIZE)
 
 
