@@ -80,7 +80,7 @@ def get_latest_src_dir(position=1):
 
 
 def get_git_ref(name):
-    return local('git show-ref {}'.format(name), capture=True).split()[0]
+    return local('git rev-parse {}'.format(name), capture=True)
 
 
 def get_django_version():
