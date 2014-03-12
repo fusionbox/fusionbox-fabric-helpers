@@ -74,9 +74,9 @@ def get_latest_src_dir(position=1):
         # Honor cd()
         if not os.path.isabs(path):
             path = env.cwd.rstrip('/') + '/' + path.lstrip('/')
-        glob_pattern = os.path.join(path, 'project.*')
-        project_directories = sorted(sftp.glob(glob_pattern))
-    return project_directories[-position]
+        glob_pattern = os.path.join(path, '{}.*'.format(SRC_DIR))
+        src_directories = sorted(sftp.glob(glob_pattern))
+    return src_directories[-position]
 
 
 def get_git_ref(name):
