@@ -142,6 +142,9 @@ def reload_code(directory):
     Update the project's code symlink to the specified directory
     And then touches the vassal
     """
+    with with_venv():
+        with in_project(directory):
+            run('python manage.py collectstatic --noinput')
     with in_project():
         run('ln -sfn {} project'.format(directory.rstrip('/')))
     sudo('touch /etc/vassals/{name}.ini'.format(name=env.vassal_name))
