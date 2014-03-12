@@ -3,7 +3,6 @@ import re
 import contextlib
 import tempfile
 import shutil
-from StringIO import StringIO
 from datetime import datetime
 
 from fabric.api import task, run, execute, env, local, sudo
