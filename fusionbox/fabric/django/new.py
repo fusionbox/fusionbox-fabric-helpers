@@ -88,18 +88,16 @@ def push_code(gitref):
             if not local_dir.endswith('/'):
                 local_dir += '/'
 
-            previous = get_project_dir(1)
+            previous = get_project_dir()
 
             rsync_project(
                 local_dir=local_dir,
                 remote_dir=os.path.join(project_dir, dest_dir),
-                exclude='.env',
                 delete=True,
                 extra_opts='--link-dest={}'.format(previous),
             )
 
-            run('cp -l {previous}/.env {new}/.env'.format(previous=previous,
-                                                          new=dest_dir))
+            run('cp -l environment {new}/.env'.format(new=dest_dir))
             run('chmod go+rx {}'.format(dest_dir))
 
     return dest_dir
@@ -120,8 +118,7 @@ def migrate(directory):
     """
     Migrate the database in this directory:
         * If this is using Django < 1.7:
-            * python manage.py syncdb
-            * python manage.py migrate
+            * python manage.py syncdb --migrate
         * If this is using Django >= 1.7:
             * python manage.py migrate
     """
@@ -130,10 +127,9 @@ def migrate(directory):
             run('python manage.py backupdb')
 
             if get_django_version() < (1, 7):
-                run('python manage.py syncdb')
-                run('python manage.py migrate')
+                run('python manage.py syncdb --migrate --noinput')
             else:
-                run('python manage.py migrate')
+                run('python manage.py migrate --noinput')
 
 
 @task
