@@ -24,6 +24,7 @@ DEFAULT_HISTORY_SIZE = 3
 DEPLOYMENT_LOCK = 'deployment.lock'
 DEPLOY_LOG = 'deploy.log'
 SRC_DIR = 'src'
+REQUIREMENT_FILE = 'requirements.txt'
 
 
 @contextlib.contextmanager
@@ -139,16 +140,14 @@ def upload_source(gitref, directory):
     run('chmod go+rx {}'.format(directory))
 
 
-def pip_install(directory):
+def pip_install():
     """
     Install requirements in this directory
     """
-    with use_virtualenv():
-        with cd_project(directory):
-            run('pip install -r requirements.txt')
+    run('pip install -r requirements.txt')
 
 
-def migrate(directory):
+def migrate():
     """
     Migrate the database in this directory:
         * If this is using Django < 1.7:
@@ -156,23 +155,19 @@ def migrate(directory):
         * If this is using Django >= 1.7:
             * python manage.py migrate
     """
-    with use_virtualenv():
-        with cd_project(directory):
-            run('python manage.py backupdb')
+    run('python manage.py backupdb')
 
-            if get_django_version() < (1, 7):
-                run('python manage.py syncdb --migrate --noinput')
-            else:
-                run('python manage.py migrate --noinput')
+    if get_django_version() < (1, 7):
+        run('python manage.py syncdb --migrate --noinput')
+    else:
+        run('python manage.py migrate --noinput')
 
 
-def collectstatic(directory):
-    with use_virtualenv():
-        with cd_project(directory):
-            run('python manage.py collectstatic --noinput')
+def collectstatic():
+    run('python manage.py collectstatic --noinput')
 
 
-def reload_uwsgi(directory):
+def reload_uwsgi():
     """
     Update the project's code symlink to the specified directory
     And then touches the vassal
@@ -184,6 +179,17 @@ def cleanup_history(size):
     with cd_project():
         # just "rm -rf" does nothing
         run('ls -d -1 {src}.* | head -n -{size:d} | xargs rm -rf'.format(src=SRC_DIR, size=size+1))
+
+
+def is_there_a_diff(file1, file2):
+    with settings(hide('stdout', 'warnings'), warn_only=True):
+        return run('diff {a} {b}'.format(a=file1, b=file2)).failed
+
+
+def count_migrations(directory):
+    with hide('stdout'):
+        migrations_list = run('find %s -name migrations -type d -exec ls -1 {} \; | egrep .\*.py\$' % directory)
+    return len(migrations_list.split('\n'))
 
 
 def push(gitref, qad):
@@ -198,24 +204,40 @@ def push(gitref, qad):
         with atomic_src_update() as directory:
             upload_source(gitref, directory)
 
-            if qad:  # TODO: Try to guess if we need to pip install
-                should_pip_install = False
-            else:
+            try:
+                previous_source = get_latest_src_dir(2)
+            except IndexError:
                 should_pip_install = True
-
-            if qad:  # TODO: Try to guess if we need to migrate
-                should_migrate = False
-            else:
                 should_migrate = True
+            else:
+                if qad:
+                    # Try to guess if we should pip install
+                    should_pip_install = is_there_a_diff(
+                        os.path.join(directory, REQUIREMENT_FILE),
+                        os.path.join(previous_source, REQUIREMENT_FILE),
+                    )
+                else:
+                    should_pip_install = True
 
+                if qad:
+                    # Try to guess if there are extra migrations
+                    migrations_now = count_migrations(directory)
+                    migrations_before = count_migrations(previous_source)
+                    # If we should pip install, new pip packages might
+                    # introduce migrations.
+                    should_migrate = should_pip_install or migrations_now != migrations_before
+                else:
+                    should_migrate = True
 
-            if should_pip_install:
-                pip_install(directory)
-            if should_migrate:
-                migrate(directory)
+            with contextlib.nested(use_virtualenv(), cd(directory)):
+                if should_pip_install:
+                    pip_install()
+                if should_migrate:
+                    migrate()
 
-            collectstatic(directory)
-        reload_uwsgi(directory)
+                collectstatic()
+
+        reload_uwsgi()
 
         with hide('running', 'stdout'):
             server_time = run('TZ=America/Denver date')
