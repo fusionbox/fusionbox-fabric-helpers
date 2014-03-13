@@ -4,7 +4,7 @@ import contextlib
 import tempfile
 import shutil
 import getpass
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from fabric.api import task, run, env, local, sudo, settings
 from fabric.context_managers import cd, prefix, hide
@@ -44,6 +44,7 @@ def use_tmp_dir():
     finally:
         shutil.rmtree(directory)
 
+
 @contextlib.contextmanager
 def use_virtualenv():
     activate_script = os.path.join(PROJECTS_PATH, env.project_name,
@@ -54,9 +55,9 @@ def use_virtualenv():
 
 @contextlib.contextmanager
 def atomic_src_update():
-    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')
-    directory = '{src}.{timestamp}'.format(
-        src=SRC_DIR, timestamp=timestamp)
+    numbers_list = get_src_dir_numbers()
+    directory = '{src}.{number:05d}'.format(
+        src=SRC_DIR, number=max(numbers_list) + 1)
 
     if env.force:
         run('rm -f {lock}'.format(lock=DEPLOYMENT_LOCK))
@@ -96,15 +97,26 @@ def is_true(b):
     return str(b).lower() not in ('no', 'n', 'false', 'f', 'a', 'abort', '0')
 
 
-def get_latest_src_dir(position=1):
+def get_src_dir_list():
     with cd_project() as path:
         sftp = SFTP(env.host_string)
         # Honor cd()
         if not os.path.isabs(path):
             path = env.cwd.rstrip('/') + '/' + path.lstrip('/')
         glob_pattern = os.path.join(path, '{}.*'.format(SRC_DIR))
-        src_directories = sorted(sftp.glob(glob_pattern))
+        return sftp.glob(glob_pattern)
+
+
+def get_latest_src_dir(position=1):
+    src_directories = sorted(get_src_dir_list())
     return src_directories[-position]
+
+
+def get_src_dir_numbers():
+    dirname_re = re.compile(r'^%s\.(\d{5})$' % re.escape(SRC_DIR))
+    dirname_list = (os.path.basename(d) for d in get_src_dir_list())
+    return [int(dirname_re.match(d).group(1))
+            for d in dirname_list if dirname_re.match(d) is not None]
 
 
 def get_git_ref(name):
@@ -277,7 +289,7 @@ def rollback():
     Rollback the code to the previous deployed version.
     """
     # TODO:
-    #   * cp -rl previous_dir new_dir.timestamp
+    #   * cp -rl previous_dir new_dir.last_number
     #   * find the ghost migration (how?)
     #   * run the migrations back
     print red("** This is not implemented yet **", bold=True)
