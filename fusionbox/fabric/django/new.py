@@ -101,8 +101,7 @@ def get_src_dir_list():
     with cd_project() as path:
         sftp = SFTP(env.host_string)
         # Honor cd()
-        if not os.path.isabs(path):
-            path = env.cwd.rstrip('/') + '/' + path.lstrip('/')
+        path = os.path.join(env.cwd, path)
         glob_pattern = os.path.join(path, '{}.*'.format(SRC_DIR))
         return sftp.glob(glob_pattern)
 
