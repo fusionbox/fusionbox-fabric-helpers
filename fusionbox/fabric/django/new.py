@@ -262,7 +262,9 @@ def push(gitref, qad):
 
         with hide('running', 'stdout'):
             server_time = run('TZ=America/Denver date')
-        append(DEPLOY_LOG, '{date}:\t{user}\t{dir}\t{ref}'.format(date=server_time, ref=gitref, dir=directory, user=getpass.getuser()))
+        append(DEPLOY_LOG, '{date}:\t{user}\t{dir}\t{ref}'.format(
+            date=server_time, ref=gitref, dir=directory, user=getpass.getuser(),
+        ))
 
         cleanup_history(DEFAULT_HISTORY_SIZE)
 
