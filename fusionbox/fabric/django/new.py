@@ -276,12 +276,11 @@ def reload_last_push():
     This should be idem-potent.
     """
     directory = get_latest_src_dir()
-    with cd_project():
-        with cd(directory):
-            pip_install()
-            migrate()
-            collectstatic()
-            reload_uwsgi()
+    with contextlib.nested(cd_project(directory), use_virtualenv()):
+        pip_install()
+        migrate()
+        collectstatic()
+        reload_uwsgi()
 
 
 @task
