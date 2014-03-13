@@ -89,6 +89,12 @@ def atomic_src_update():
         run('mv -f -T {lock} {src}'.format(lock=DEPLOYMENT_LOCK, src=SRC_DIR))
 
 
+def is_true(b):
+    """
+    Checks if an argument passed through the command line is true
+    """
+    return str(b).lower() not in ('no', 'n', 'false', 'f', 'a', 'abort', '0')
+
 
 def get_latest_src_dir(position=1):
     with cd_project() as path:
@@ -293,7 +299,7 @@ def deploy(branch='origin/live', force=False):
     """
     Deploy the live branch to the live server
     """
-    env.force = force
+    env.force = is_true(force)
     local('git fetch --all')
     gitref = get_git_ref(branch)
     return push(gitref, qad=False)
@@ -305,9 +311,9 @@ def stage(branch='HEAD', qad=True, force=False):
     """
     Deploy the current branch to the dev server
     """
-    env.force = force
+    env.force = is_true(force)
     gitref = get_git_ref(branch)
-    return push(gitref, qad)
+    return push(gitref, is_true(qad))
 
 
 @task
