@@ -140,6 +140,10 @@ def upload_source(gitref, directory):
             remote_dir=os.path.join(env.cwd, directory),
             delete=True,
             extra_opts='--link-dest={}'.format(previous),
+            # Fabric defaults to -pthrvz
+            # -t preserve the modification time. We want to ignore that.
+            # -c will use checksum to compare files
+            default_opts='-pchrvz',
         )
 
     run('cp -l environment {new}/.env'.format(new=directory))
