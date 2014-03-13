@@ -188,8 +188,8 @@ def is_there_a_diff(file1, file2):
 
 def count_migrations(directory):
     with hide('stdout'):
-        migrations_list = run('find %s -name migrations -type d -exec ls -1 {} \; | egrep .\*.py\$' % directory)
-    return len(migrations_list.split('\n'))
+        migrations_list = run('find {} -path "*/migrations/*.py" -print0'.format(directory))
+    return len(migrations_list.split('\0'))
 
 
 def push(gitref, qad):
