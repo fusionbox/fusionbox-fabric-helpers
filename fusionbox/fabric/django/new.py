@@ -25,6 +25,7 @@ DEPLOYMENT_LOCK = 'deployment.lock'
 DEPLOY_LOG = 'deploy.log'
 SRC_DIR = 'src'
 REQUIREMENT_FILE = 'requirements.txt'
+SRC_DIRNAMES_RE = re.compile(r'^%s\.(\d{5})$' % re.escape(SRC_DIR))
 
 
 @contextlib.contextmanager
@@ -112,10 +113,9 @@ def get_latest_src_dir(position=1):
 
 
 def get_src_dir_numbers():
-    dirname_re = re.compile(r'^%s\.(\d{5})$' % re.escape(SRC_DIR))
     dirname_list = (os.path.basename(d) for d in get_src_dir_list())
-    return [int(dirname_re.match(d).group(1))
-            for d in dirname_list if dirname_re.match(d) is not None]
+    return [int(SRC_DIRNAMES_RE.match(d).group(1))
+            for d in dirname_list if SRC_DIRNAMES_RE.match(d) is not None]
 
 
 def get_git_ref(name):
@@ -196,10 +196,29 @@ def reload_uwsgi():
     sudo('touch /etc/vassals/{name}.ini'.format(name=env.vassal_name))
 
 
-def cleanup_history(size):
+def cleanup_history(size, superclean=False):
+    if size < 0:
+        raise ValueError("The history size can't be negative")
     with cd_project():
-        # just "rm -rf" does nothing
-        run('ls -d -1 {src}.* | head -n -{size:d} | xargs rm -rf'.format(src=SRC_DIR, size=size+1))
+        current_src = os.path.basename(run('readlink -f {}'.format(SRC_DIR)))
+
+        assert SRC_DIRNAMES_RE.match(current_src) is not None, "This server has weird src directory names"
+        current_number = int(SRC_DIRNAMES_RE.match(current_src).group(1))
+
+        src_directories = [os.path.basename(d) for d in get_src_dir_list()]
+        # src directory that have been deployed
+        deployed_src = [dirname for dirname in src_directories
+                        if int(SRC_DIRNAMES_RE.match(dirname).group(1)) < current_number]
+        deployed_src.sort(reverse=True)
+
+        to_remove = deployed_src[size:]
+
+        if superclean:
+            dirty_src = [dirname for dirname in src_directories
+                         if int(SRC_DIRNAMES_RE.match(dirname).group(1)) > current_number]
+            to_remove += dirty_src
+
+        run('rm -rf {}'.format(' '.join(to_remove)))
 
 
 def is_there_a_diff(file1, file2):
@@ -297,7 +316,7 @@ def rollback():
 
 
 @task
-def cleanup(size=1):
+def cleanup(size=1, superclean=True):
     """
     Cleanup the previous deployed version. Just keep the current deployed one.
 
@@ -305,8 +324,8 @@ def cleanup(size=1):
     """
     size = int(size)
     if size < 1:
-        raise ValueError("We need at list one version")
-    return cleanup_history(size)
+        raise ValueError("The history size can't be less than 1")
+    return cleanup_history(size-1, superclean=is_true(superclean))
 
 
 @task
