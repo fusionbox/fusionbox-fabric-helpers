@@ -58,7 +58,7 @@ def use_virtualenv():
 def atomic_src_update():
     numbers_list = get_src_dir_numbers()
     directory = '{src}.{number:05d}'.format(
-        src=SRC_DIR, number=max(numbers_list) + 1)
+        src=SRC_DIR, number=max(numbers_list + [0]) + 1)
 
     if env.force:
         run('rm -f {lock}'.format(lock=DEPLOYMENT_LOCK))
