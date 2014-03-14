@@ -5,14 +5,17 @@ import tempfile
 import shutil
 import getpass
 from datetime import timedelta
+from StringIO import StringIO
+from collections import namedtuple
 
-from fabric.api import task, run, env, local, sudo, settings
+from fabric.api import task, run, env, local, sudo, settings, get
 from fabric.context_managers import cd, prefix, hide
 from fabric.decorators import roles
 from fabric.contrib.project import rsync_project
 from fabric.contrib.files import append
+from fabric.contrib.console import confirm
 from fabric.sftp import SFTP
-from fabric.colors import red
+from fabric.colors import red, blue
 from fabric.utils import abort
 
 __all__ = ['stage', 'deploy', 'fetch_dbdump', 'cleanup', 'reload_last_push',
@@ -235,6 +238,22 @@ def count_migrations(directory):
     return len(migrations_list.split('\0'))
 
 
+def is_ancestor_of(old, new):
+    with settings(hide('running', 'stdout', 'stderr', 'warnings'), warn_only=True):
+        return local('git merge-base --is-ancestor {old} {new}'.format(
+            old=old, new=new,
+        )).succeeded
+
+
+LogEntry = namedtuple('LogEntry', ['human_date', 'username', 'dir', 'hash'])
+
+def get_deploy_log():
+    with settings(hide('running', 'stdout', 'stderr', 'warnings'), warn_only=True):
+        log = StringIO()
+        get(DEPLOY_LOG, log)
+        return [LogEntry(*i.split('\t')) for i in log.getvalue().split('\n') if len(i)]
+
+
 def push(gitref, qad):
     """
     Push the last changes
@@ -245,6 +264,25 @@ def push(gitref, qad):
     """
     with cd_project():
         with atomic_src_update() as directory:
+            try:
+                previous_deploy = get_deploy_log()[-1]
+            except IndexError:
+                # first deploy
+                pass
+            else:
+                if not is_ancestor_of(previous_deploy.hash, gitref):
+                    message = blue(
+                        "Warning: Going to update from {old} (deployed by {user}) to {new},"
+                        " which is not a fast-forward. Continue?".format(
+                            old=previous_deploy.hash[:8],
+                            new=gitref[:8],
+                            user=previous_deploy.username,
+                        ),
+                        bold=True,
+                    )
+                    if not confirm(message, default=False):
+                        abort("Aborted.")
+
             upload_source(gitref, directory)
 
             try:
@@ -280,14 +318,13 @@ def push(gitref, qad):
 
                 collectstatic()
 
+            with hide('running', 'stdout'):
+                server_time = run('TZ=America/Denver date')
+            append(DEPLOY_LOG, '{date}:\t{user}\t{dir}\t{ref}'.format(
+                date=server_time, ref=gitref, dir=directory, user=getpass.getuser(),
+            ))
+
         reload_uwsgi()
-
-        with hide('running', 'stdout'):
-            server_time = run('TZ=America/Denver date')
-        append(DEPLOY_LOG, '{date}:\t{user}\t{dir}\t{ref}'.format(
-            date=server_time, ref=gitref, dir=directory, user=getpass.getuser(),
-        ))
-
         cleanup_history(DEFAULT_HISTORY_SIZE)
 
 
