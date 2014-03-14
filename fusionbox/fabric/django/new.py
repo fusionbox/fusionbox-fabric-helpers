@@ -153,8 +153,11 @@ def upload_source(gitref, directory):
             extra_opts='--link-dest={}'.format(previous),
             # Fabric defaults to -pthrvz
             # -t preserve the modification time. We want to ignore that.
+            # -v print the file being updated
+            # We replaced these by:
             # -c will use checksum to compare files
-            default_opts='-pchrvz',
+            # -i will print what kind of transfer has been done (copy/upload/...)
+            default_opts='-pchriz',
         )
 
     run('cp -l environment {new}/.env'.format(new=directory))
