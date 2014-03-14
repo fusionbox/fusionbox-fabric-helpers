@@ -29,6 +29,7 @@ DEPLOY_LOG = 'deploy.log'
 SRC_DIR = 'src'
 REQUIREMENT_FILE = 'requirements.txt'
 SRC_DIRNAMES_RE = re.compile(r'^%s\.(\d{5})$' % re.escape(SRC_DIR))
+VIRTUALENV = 'virtualenv'
 
 
 @contextlib.contextmanager
@@ -133,6 +134,10 @@ def get_django_version():
         raise RuntimeError("Couldn't parse django version {}".format(
            django_version_str))
     return tuple(int(g) for g in m.groups())
+
+
+def generate_pyc():
+    run('python -m compileall . > /dev/null')
 
 
 def upload_source(gitref, directory):
@@ -317,6 +322,16 @@ def push(gitref, qad):
                     migrate()
 
                 collectstatic()
+
+            with cd(directory):
+                generate_pyc()
+
+            if should_pip_install:
+                # "pip install" generates pyc files in site-packages
+                # but "pip install -e" doesn't generate any pyc files
+                virtualenv_src = os.path.join(VIRTUALENV, 'src')
+                with cd(virtualenv_src):
+                    generate_pyc()
 
             with hide('running', 'stdout'):
                 server_time = run('TZ=America/Denver date')
