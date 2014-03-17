@@ -4,6 +4,7 @@ import contextlib
 import tempfile
 import shutil
 import getpass
+import sys
 from datetime import timedelta
 from StringIO import StringIO
 from collections import namedtuple
@@ -245,9 +246,22 @@ def count_migrations(directory):
 
 def is_ancestor_of(old, new):
     with settings(hide('running', 'stdout', 'stderr', 'warnings'), warn_only=True):
-        return local('git merge-base --is-ancestor {old} {new}'.format(
+        ret = local('git merge-base --is-ancestor {old} {new}'.format(
             old=old, new=new,
-        )).succeeded
+        ), capture=True)
+
+        if ret.return_code not in (0, 1, 128):
+            # 0 -- is ancestor
+            # 1 -- not ancestor
+            # 128 -- invalid ref (probably not in the local repo) (same as not ancestor)
+            # anything else -- report the error
+            sys.stderr.write(ret.stderr)
+            abort(red(
+                "Couldn't check ancestry, are you running an old version of git?",
+                bold=True,
+            ))
+
+        return ret.succeeded
 
 
 LogEntry = namedtuple('LogEntry', ['human_date', 'username', 'dir', 'hash'])
