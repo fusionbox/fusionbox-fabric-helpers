@@ -19,7 +19,7 @@ from fabric.colors import red, blue
 from fabric.utils import abort
 
 __all__ = ['stage', 'deploy', 'fetch_dbdump', 'cleanup', 'reload_last_push',
-           'rollback']
+           'rollback', 'shell_plus']
 
 
 PROJECTS_PATH = '/var/www/'
@@ -413,3 +413,14 @@ def fetch_dbdump():
     """
     print red("** This is not implemented yet **", bold=True)
     local('false')
+
+
+@task
+def shell_plus():
+    """
+    Run a shell on the server
+    """
+    src_directory = get_latest_src_dir()
+    with cd_project(src_directory):
+        with use_virtualenv():
+            run("python manage.py shell_plus")
