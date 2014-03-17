@@ -19,7 +19,7 @@ from fabric.colors import red, blue
 from fabric.utils import abort
 
 __all__ = ['stage', 'deploy', 'fetch_dbdump', 'cleanup', 'reload_last_push',
-           'rollback', 'shell_plus']
+           'rollback', 'django']
 
 
 PROJECTS_PATH = '/var/www/'
@@ -416,11 +416,11 @@ def fetch_dbdump():
 
 
 @task
-def shell_plus():
+def django(command):
     """
     Run a shell on the server
     """
     src_directory = get_latest_src_dir()
     with cd_project(src_directory):
         with use_virtualenv():
-            run("python manage.py shell_plus")
+            run("python manage.py {}".format(command))
