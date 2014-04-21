@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import os
 import subprocess
 
-from fabric.api import run, cd, puts, local, get, env
+from fabric.api import run, cd, puts, local, get, env, task
 
 from fusionbox.fabric import fb_env
 from fusionbox.fabric.git import get_git_branch
@@ -11,6 +11,7 @@ from fusionbox.fabric.update import get_update_function
 from fusionbox.fabric.utils import virtualenv, files_changed
 
 
+@task
 def stage(pip=False, migrate=False, syncdb=False, branch=None, post_update=None, role='dev'):
     """
     Updates the remote site files to your local branch head, collects static
@@ -54,6 +55,7 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, post_update=None,
         run(restart_cmd)
 
 
+@task
 def deploy(post_update=None):
     """
     Same as stage, but always uses the live branch and live config settings,
