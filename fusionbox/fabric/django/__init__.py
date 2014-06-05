@@ -9,6 +9,7 @@ from fusionbox.fabric import fb_env
 from fusionbox.fabric.git import get_git_branch
 from fusionbox.fabric.update import get_update_function
 from fusionbox.fabric.utils import virtualenv, files_changed
+from fusionbox.fabric.django.new import get_django_version
 
 
 def stage(pip=False, migrate=False, syncdb=False, branch=None, post_update=None, role='dev'):
@@ -43,11 +44,15 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, post_update=None,
             if syncdb or migrate:
                 run('python manage.py backupdb')
 
-            if syncdb:
-                run('python manage.py syncdb')
+            if get_django_version() < (1, 7):  # Django 1.7 introduced migrations
+                if syncdb:
+                    run('python manage.py syncdb')
 
-            if migrate:
-                run('python manage.py migrate')
+                if migrate:
+                    run('python manage.py migrate')
+            else:
+                if syncdb or migrate:
+                    run('python manage.py migrate')
 
             run('python manage.py collectstatic --noinput')
 
