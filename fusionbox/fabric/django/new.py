@@ -138,7 +138,9 @@ def get_django_version():
 
 
 def generate_pyc():
-    run('python -m compileall . > /dev/null')
+    # compilation can fail
+    with settings(warn_only=True):
+        run('python -m compileall . > /dev/null')
 
 
 def upload_source(gitref, directory):
