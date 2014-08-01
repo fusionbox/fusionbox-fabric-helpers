@@ -232,7 +232,8 @@ def cleanup_history(size, superclean=False):
                          if int(SRC_DIRNAMES_RE.match(dirname).group(1)) > current_number]
             to_remove += dirty_src
 
-        run('rm -rf {}'.format(' '.join(to_remove)))
+        if to_remove:
+            run('rm -rf {}'.format(' '.join(to_remove)))
 
 
 def is_there_a_diff(file1, file2):
