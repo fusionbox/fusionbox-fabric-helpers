@@ -306,7 +306,8 @@ def push(gitref, qad):
             upload_source(gitref, directory)
 
             try:
-                previous_source = get_latest_src_dir(2)
+                previous_source = os.path.basename(
+                    run('readlink -f {}'.format(SRC_DIR)))
             except IndexError:
                 should_pip_install = True
                 should_migrate = True
