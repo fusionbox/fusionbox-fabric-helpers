@@ -155,13 +155,11 @@ def upload_source(gitref, directory):
         if not local_dir.endswith('/'):
             local_dir += '/'
 
-        previous = get_latest_src_dir()
-
         rsync_project(
             local_dir=local_dir,
             remote_dir=os.path.join(env.cwd, directory),
             delete=True,
-            extra_opts='--link-dest={}'.format(previous),
+            extra_opts=' '.join('--link-dest={}'.format(d) for d in get_src_dir_list()),
             # Fabric defaults to -pthrvz
             # -t preserve the modification time. We want to ignore that.
             # -v print the file being updated
