@@ -13,7 +13,8 @@ from fabric.api import task, run, env, local, sudo, settings, get
 from fabric.context_managers import cd, prefix, hide
 from fabric.decorators import roles
 from fabric.contrib.project import rsync_project
-from fabric.contrib.files import append
+from fabric.contrib.files import append, exists
+from fabric.contrib.console import confirm
 from fabric.contrib.console import confirm
 from fabric.sftp import SFTP
 from fabric.colors import red, blue
@@ -205,7 +206,18 @@ def reload_uwsgi():
     Update the project's code symlink to the specified directory
     And then touches the vassal
     """
-    sudo('touch /etc/vassals/{name}.ini'.format(name=env.vassal_name))
+    possibilities_templates = [
+        '/etc/vassals/{name}.ini',
+        '/etc/uwsgi-emperor/vassals/{name}.ini',
+    ]
+    possibilities = [f.format(name=env.vassal_name) for f in possibilities_templates]
+
+    for fname in possibilities:
+        if exists(fname):
+            sudo('touch {}'.format(fname))
+            break
+    else:
+        raise RuntimeError("Couldn't find the vassal file in %s" % possibilities)
 
 
 def cleanup_history(size, superclean=False):
