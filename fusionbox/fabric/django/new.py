@@ -15,7 +15,6 @@ from fabric.decorators import roles
 from fabric.contrib.project import rsync_project
 from fabric.contrib.files import append, exists
 from fabric.contrib.console import confirm
-from fabric.contrib.console import confirm
 from fabric.sftp import SFTP
 from fabric.colors import red, blue
 from fabric.utils import abort
