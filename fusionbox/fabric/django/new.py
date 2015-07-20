@@ -178,7 +178,7 @@ def pip_install():
     """
     Install requirements in this directory
     """
-    run('pip install -r requirements.txt')
+    run('pip install --upgrade -r requirements.txt')
 
 
 def migrate():
