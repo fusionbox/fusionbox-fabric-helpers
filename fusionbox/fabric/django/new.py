@@ -180,7 +180,7 @@ def pip_install():
     run('pip install --upgrade -r requirements.txt')
 
 
-def migrate():
+def migrate(backupdb):
     """
     Migrate the database in this directory:
         * If this is using Django < 1.7:
@@ -188,7 +188,8 @@ def migrate():
         * If this is using Django >= 1.7:
             * python manage.py migrate
     """
-    run('python manage.py backupdb')
+    if backupdb:
+        run('python manage.py backupdb')
 
     if get_django_version() < (1, 7):
         run('python manage.py syncdb --migrate --noinput')
@@ -285,7 +286,7 @@ def get_deploy_log():
         return [LogEntry(*i.split('\t')) for i in log.getvalue().split('\n') if len(i)]
 
 
-def push(gitref, qad):
+def push(gitref, qad, backupdb):
     """
     Push the last changes
 
@@ -346,7 +347,7 @@ def push(gitref, qad):
                 if should_pip_install:
                     pip_install()
                 if should_migrate:
-                    migrate()
+                    migrate(backupdb)
 
                 collectstatic()
 
@@ -412,25 +413,25 @@ def cleanup(size=1, superclean=True):
 
 @task
 @roles('live')
-def deploy(branch='origin/live', force=False):
+def deploy(branch='origin/live', force=False, backupdb=True):
     """
     Deploy the live branch to the live server
     """
     env.force = is_true(force)
     local('git fetch --all')
     gitref = get_git_ref(branch)
-    return push(gitref, qad=False)
+    return push(gitref, qad=False, backupdb=is_true(backupdb))
 
 
 @task
 @roles('dev')
-def stage(branch='HEAD', qad=True, force=False):
+def stage(branch='HEAD', qad=True, force=False, backupdb=True):
     """
     Deploy the current branch to the dev server
     """
     env.force = is_true(force)
     gitref = get_git_ref(branch)
-    return push(gitref, is_true(qad))
+    return push(gitref, is_true(qad), is_true(backupdb))
 
 
 @task
