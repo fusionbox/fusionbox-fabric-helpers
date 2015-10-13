@@ -6,22 +6,11 @@ __doc__ = """
 Fabric helpers.
 """
 
-version = (0, 4, 0, 'alpha')
-
-
-def get_version():
-    number = '.'.join(map(str, version[:3]))
-    stage = version[3]
-    if stage == 'final':
-        return number
-    elif stage == 'alpha':
-        process = subprocess.Popen('git rev-parse HEAD'.split(), stdout=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        return number + '-' + stdout.decode('utf-8').strip()[:8]
+version = "0.6.0.dev0"
 
 setup(
     name='fusionbox-fabric-helpers',
-    version=get_version(),
+    version=version,
     description='Fabric Helpers',
     author='Fusionbox programmers',
     author_email='programmers@fusionbox.com',
