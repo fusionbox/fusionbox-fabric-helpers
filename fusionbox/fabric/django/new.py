@@ -175,9 +175,16 @@ def upload_source(gitref, directory):
 
 def pip_install():
     """
-    Install requirements in this directory
+    Install requirements in this directory.
+
+    Use pip-sync for projects that are using pip-tools to
+    compile requirements.in files, and vanilla pip for other
+    projects.
     """
-    run('pip install --upgrade -r requirements.txt')
+    if run('[ -f requirements.in ]').succeeded:
+        run('pip-sync')
+    else:
+        run('pip install --upgrade -r requirements.txt')
 
 
 def migrate(backupdb):
