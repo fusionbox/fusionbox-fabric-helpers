@@ -45,7 +45,6 @@ setup(
     install_requires=[
         'fabric>=1.4',
         'termcolor>=1.1.0',
-        'django-backupdb>=0.4.3',
     ],
     requires=['fabric'],
 )
