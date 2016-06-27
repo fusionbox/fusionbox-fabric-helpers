@@ -173,6 +173,15 @@ def upload_source(gitref, directory):
     run('chmod go+rx {}'.format(directory))
 
 
+def build_source():
+    """
+    Run a build command from the env in this directory
+    """
+
+    if env.build_command is not None:
+        run(env.build_command)
+
+
 def pip_install():
     """
     Install requirements in this directory
@@ -316,6 +325,9 @@ def push(gitref, qad, backupdb):
                         abort("Aborted.")
 
             upload_source(gitref, directory)
+
+            with cd(directory):
+                build_source()
 
             try:
                 previous_source = os.path.basename(
