@@ -1,7 +1,7 @@
 0.6.1 (unreleased)
 ------------------
-
-- Nothing changed yet.
+Fix bug in qad=False.
+Remove dependency on django-backupdb.
 
 
 0.6.0 (2015-10-13)
