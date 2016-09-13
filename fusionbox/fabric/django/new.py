@@ -420,7 +420,7 @@ def deploy(branch='origin/live', force=False, backupdb=True):
     env.force = is_true(force)
     local('git fetch --all')
     gitref = get_git_ref(branch)
-    return push(gitref, qad=False, backupdb=is_true(backupdb))
+    return push(gitref, False, is_true(backupdb))
 
 
 @task
