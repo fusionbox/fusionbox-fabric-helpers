@@ -159,7 +159,6 @@ def upload_source(gitref, directory):
             local_dir=local_dir,
             remote_dir=os.path.join(env.cwd, directory),
             delete=True,
-            extra_opts=' '.join('--link-dest={}'.format(d) for d in get_src_dir_list()),
             # Fabric defaults to -pthrvz
             # -t preserve the modification time. We want to ignore that.
             # -v print the file being updated
