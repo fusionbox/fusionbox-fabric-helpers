@@ -159,7 +159,6 @@ def upload_source(gitref, directory):
             local_dir=local_dir,
             remote_dir=os.path.join(env.cwd, directory),
             delete=True,
-            extra_opts=' '.join('--link-dest={}'.format(d) for d in get_src_dir_list()),
             # Fabric defaults to -pthrvz
             # -t preserve the modification time. We want to ignore that.
             # -v print the file being updated
@@ -432,7 +431,7 @@ def deploy(branch='origin/live', force=False, backupdb=True):
     env.force = is_true(force)
     local('git fetch --all')
     gitref = get_git_ref(branch)
-    return push(gitref, qad=False, backupdb=is_true(backupdb))
+    return push(gitref, False, is_true(backupdb))
 
 
 @task
