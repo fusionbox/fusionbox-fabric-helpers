@@ -178,7 +178,7 @@ def upload_source(gitref, directory):
         )
 
     run('cp -l environment {new}/.env'.format(new=directory))
-    run('chmod go+rx {}'.format(directory))
+    run('chmod 750 {}'.format(directory))
 
 
 def pip_install():
