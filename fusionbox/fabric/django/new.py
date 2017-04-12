@@ -253,7 +253,11 @@ def is_there_a_diff(file1, file2):
 
 def count_migrations(directory):
     with hide('stdout'):
-        migrations_list = run('find . -path "./{}/*/migrations/*.py" -print0'.format(directory))
+        migrations_list = run(
+            'if [ -d "./{}" ]; then find "./{}" -path "*/migrations/*.py" -print0; fi'.format(
+                directory, directory
+            )
+        )
     return len(migrations_list.split('\0'))
 
 
