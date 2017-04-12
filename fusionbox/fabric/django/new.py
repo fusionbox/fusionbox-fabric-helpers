@@ -155,11 +155,19 @@ def upload_source(gitref, directory):
         if not local_dir.endswith('/'):
             local_dir += '/'
 
+        # Copy unchanged files from existing src directories. We used
+        # --link-dest before, but this was causing completely baffling silent
+        # failures where the wrong code ended up deployed. Maybe this will work
+        # better. Arguably this is less surprising anyway.
+        extra_opts_list = ['--copy-dest={}'.format(d) for d in get_src_dir_list()]
+        # Remove global permissions, set group to www-data
+        extra_opts_list += ['-g', '--chown=:www-data', '--chmod=o-rwx']
+
         rsync_project(
             local_dir=local_dir,
             remote_dir=os.path.join(env.cwd, directory),
             delete=True,
-            extra_opts=' '.join('--link-dest={}'.format(d) for d in get_src_dir_list()),
+            extra_opts=' '.join(extra_opts_list),
             # Fabric defaults to -pthrvz
             # -t preserve the modification time. We want to ignore that.
             # -v print the file being updated
