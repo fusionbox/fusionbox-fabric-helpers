@@ -139,7 +139,7 @@ def get_django_version():
 
 def generate_pyc():
     # compilation can fail
-    with settings(warn_only=True):
+    with settings(warn_only=True), prefix('umask 027'):
         run('python -m compileall . > /dev/null')
 
 
