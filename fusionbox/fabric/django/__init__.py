@@ -46,11 +46,8 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None, post_update=None,
                 run('python manage.py backupdb')
 
             if get_django_version() < (1, 7):  # Django 1.7 introduced migrations
-                if syncdb:
-                    run('python manage.py syncdb')
-
-                if migrate:
-                    run('python manage.py migrate')
+                if syncdb or migrate:
+                    run('python manage.py syncdb --migrate')
             else:
                 if syncdb or migrate:
                     run('python manage.py migrate')
