@@ -363,14 +363,14 @@ def push(gitref, qad, backupdb):
 
                 collectstatic()
 
-            with cd(directory):
+            with contextlib.nested(use_virtualenv(), cd(directory)):
                 generate_pyc()
 
             if should_pip_install:
                 # "pip install" generates pyc files in site-packages
                 # but "pip install -e" doesn't generate any pyc files
                 virtualenv_src = os.path.join(VIRTUALENV, 'src')
-                with cd(virtualenv_src):
+                with contextlib.nested(use_virtualenv(), cd(directory)):
                     generate_pyc()
 
             with hide('running', 'stdout'):
