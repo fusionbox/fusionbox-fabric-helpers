@@ -161,7 +161,7 @@ def upload_source(gitref, directory):
         # better. Arguably this is less surprising anyway.
         extra_opts_list = ['--copy-dest={}'.format(d) for d in get_src_dir_list()]
         # Remove global permissions, set group to www-data
-        extra_opts_list += ['-g', '--chown=:virtualenv', '--chmod=o-rwx']
+        extra_opts_list += ['-g', '--chown=:www-data', '--chmod=o-rwx']
 
         rsync_project(
             local_dir=local_dir,
