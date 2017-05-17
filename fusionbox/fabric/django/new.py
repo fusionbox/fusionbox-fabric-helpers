@@ -155,13 +155,14 @@ def upload_source(gitref, directory):
         if not local_dir.endswith('/'):
             local_dir += '/'
 
-        # Copy unchanged files from existing src directories. We used
-        # --link-dest before, but this was causing completely baffling silent
-        # failures where the wrong code ended up deployed. Maybe this will work
-        # better. Arguably this is less surprising anyway.
-        extra_opts_list = ['--copy-dest={}'.format(d) for d in get_src_dir_list()]
+        # Hard link from latest src dir if file is unchanged
         # Remove global permissions, set group to www-data
-        extra_opts_list += ['-g', '--chown=:www-data', '--chmod=o-rwx']
+        extra_opts_list = [
+            '--link-dest={}'.format(get_latest_src_dir()),
+            '-g',
+            '--chown=:www-data',
+            '--chmod=o-rwx',
+        ]
 
         rsync_project(
             local_dir=local_dir,
