@@ -6,7 +6,7 @@ __doc__ = """
 Fabric helpers.
 """
 
-version = '0.6.2'
+version = '0.6.3.dev0'
 
 setup(
     name='fusionbox-fabric-helpers',
