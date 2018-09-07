@@ -6,7 +6,7 @@ __doc__ = """
 Fabric helpers.
 """
 
-version = '0.6.2.dev0'
+version = '0.6.3.dev0'
 
 setup(
     name='fusionbox-fabric-helpers',
@@ -43,7 +43,7 @@ setup(
         'virtualenv',
     ],
     install_requires=[
-        'fabric>=1.4',
+        'fabric>=1.4,<2.0',
         'termcolor>=1.1.0',
     ],
     requires=['fabric'],

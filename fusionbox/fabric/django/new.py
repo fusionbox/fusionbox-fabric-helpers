@@ -139,7 +139,7 @@ def get_django_version():
 
 def generate_pyc():
     # compilation can fail
-    with settings(warn_only=True):
+    with settings(warn_only=True), prefix('umask 027'):
         run('python -m compileall . > /dev/null')
 
 
@@ -155,10 +155,20 @@ def upload_source(gitref, directory):
         if not local_dir.endswith('/'):
             local_dir += '/'
 
+        # Hard link from latest src dir if file is unchanged
+        # Remove global permissions, set group to www-data
+        extra_opts_list = [
+            '--link-dest={}'.format(get_latest_src_dir()),
+            '-g',
+            '--chown=:www-data',
+            '--chmod=o-rwx',
+        ]
+
         rsync_project(
             local_dir=local_dir,
             remote_dir=os.path.join(env.cwd, directory),
             delete=True,
+            extra_opts=' '.join(extra_opts_list),
             # Fabric defaults to -pthrvz
             # -t preserve the modification time. We want to ignore that.
             # -v print the file being updated
@@ -169,7 +179,7 @@ def upload_source(gitref, directory):
         )
 
     run('cp -l environment {new}/.env'.format(new=directory))
-    run('chmod go+rx {}'.format(directory))
+    run('chmod 2750 {}'.format(directory))
 
 
 def build_source():
@@ -261,7 +271,11 @@ def is_there_a_diff(file1, file2):
 
 def count_migrations(directory):
     with hide('stdout'):
-        migrations_list = run('find . -path "./{}/*/migrations/*.py" -print0'.format(directory))
+        migrations_list = run(
+            'if [ -d "./{}" ]; then find "./{}" -path "*/migrations/*.py" -print0; fi'.format(
+                directory, directory
+            )
+        )
     return len(migrations_list.split('\0'))
 
 
@@ -362,14 +376,14 @@ def push(gitref, qad, backupdb):
 
                 collectstatic()
 
-            with cd(directory):
+            with contextlib.nested(use_virtualenv(), cd(directory)):
                 generate_pyc()
 
             if should_pip_install:
                 # "pip install" generates pyc files in site-packages
                 # but "pip install -e" doesn't generate any pyc files
                 virtualenv_src = os.path.join(VIRTUALENV, 'src')
-                with cd(virtualenv_src):
+                with contextlib.nested(use_virtualenv(), cd(directory)):
                     generate_pyc()
 
             with hide('running', 'stdout'):
