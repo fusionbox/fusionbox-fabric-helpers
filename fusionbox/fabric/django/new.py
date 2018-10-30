@@ -155,14 +155,19 @@ def upload_source(gitref, directory):
         if not local_dir.endswith('/'):
             local_dir += '/'
 
-        # Hard link from latest src dir if file is unchanged
         # Remove global permissions, set group to www-data
         extra_opts_list = [
-            '--link-dest={}'.format(get_latest_src_dir()),
             '-g',
             '--chown=:www-data',
             '--chmod=o-rwx',
         ]
+        try:
+            latest_src_dir = get_latest_src_dir()
+            # Hard link from latest src dir if file is unchanged
+            extra_opts_list.insert(0, '--link-dest={}'.format(latest_src_dir))
+        except IndexError:
+            # No directory exists yet, this is a new deployment
+            pass
 
         rsync_project(
             local_dir=local_dir,
