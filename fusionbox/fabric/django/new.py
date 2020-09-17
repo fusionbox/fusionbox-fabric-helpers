@@ -164,14 +164,18 @@ def upload_source(gitref, directory):
     Push the new code into a new directory
     """
     with cd_git_extract(gitref) as extract_dir:
-        # Hard link from latest src dir if file is unchanged
         # Remove global permissions, set group to www-data
         extra_opts_list = [
-            '--link-dest={}'.format(get_latest_src_dir()),
             '-g',
             '--chown=:www-data',
             '--chmod=o-rwx',
         ]
+        src_directories = sorted(get_src_dir_list())
+        if src_directories:
+            # Hard link from latest src dir if file is unchanged
+            extra_opts_list.append(
+                '--link-dest={}'.format(src_directories[-1]),
+            )
 
         rsync_project(
             local_dir=extract_dir,
