@@ -43,7 +43,8 @@ setup(
         'virtualenv',
     ],
     install_requires=[
-        'fabric>=1.4,<2.0',
+        'fabric>=1.4,<1.13',
+        'paramiko>=1.10,<2.0',
         'termcolor>=1.1.0',
     ],
     requires=['fabric'],
