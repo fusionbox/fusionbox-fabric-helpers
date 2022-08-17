@@ -129,7 +129,7 @@ def get_git_ref(name):
 
 
 def get_django_version():
-    django_version_str = run('django-admin.py version')
+    django_version_str = run('django-admin version')
     # Parse django version
     m = re.match(r'^([0-9]+)\.([0-9]+).*', django_version_str)
     if m is None:
