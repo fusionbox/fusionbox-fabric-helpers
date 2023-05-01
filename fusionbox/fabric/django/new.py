@@ -5,12 +5,13 @@ import tempfile
 import shutil
 import getpass
 import sys
+import atexit
 from datetime import timedelta
 from StringIO import StringIO
 from collections import namedtuple
 
 from fabric.api import task, run, env, local, sudo, settings, get
-from fabric.context_managers import cd, prefix, hide
+from fabric.context_managers import cd, prefix, hide, lcd
 from fabric.decorators import roles
 from fabric.contrib.project import rsync_project
 from fabric.contrib.files import append, exists
@@ -128,7 +129,7 @@ def get_git_ref(name):
 
 
 def get_django_version():
-    django_version_str = run('django-admin.py version')
+    django_version_str = run('django-admin version')
     # Parse django version
     m = re.match(r'^([0-9]+)\.([0-9]+).*', django_version_str)
     if m is None:
@@ -143,29 +144,41 @@ def generate_pyc():
         run('python -m compileall . > /dev/null')
 
 
+@contextlib.contextmanager
+def cd_git_extract(gitref, tmp_dir=tempfile.mkdtemp()):
+    # last argument adds trailing slash, which is needed by rsync
+    extract_dir = os.path.join(tmp_dir, gitref, '')
+
+    if not os.path.exists(extract_dir):
+        os.makedirs(extract_dir)
+        local('git archive {ref} | tar x -C {dir}'.format(ref=gitref, dir=extract_dir))
+        # removes the tmpdir, other registered functions will do nothing
+        atexit.register(shutil.rmtree, tmp_dir, ignore_errors=True)
+
+    with lcd(extract_dir):
+        yield extract_dir
+
+
 def upload_source(gitref, directory):
     """
     Push the new code into a new directory
     """
-
-    with use_tmp_dir() as local_dir:
-        local('git archive {ref} | tar x -C {dir}'.format(ref=gitref, dir=local_dir))
-
-        # Add trailing slash for rsync
-        if not local_dir.endswith('/'):
-            local_dir += '/'
-
-        # Hard link from latest src dir if file is unchanged
+    with cd_git_extract(gitref) as extract_dir:
         # Remove global permissions, set group to www-data
         extra_opts_list = [
-            '--link-dest={}'.format(get_latest_src_dir()),
             '-g',
             '--chown=:www-data',
             '--chmod=o-rwx',
         ]
+        src_directories = sorted(get_src_dir_list())
+        if src_directories:
+            # Hard link from latest src dir if file is unchanged
+            extra_opts_list.append(
+                '--link-dest={}'.format(src_directories[-1]),
+            )
 
         rsync_project(
-            local_dir=local_dir,
+            local_dir=extract_dir,
             remote_dir=os.path.join(env.cwd, directory),
             delete=True,
             extra_opts=' '.join(extra_opts_list),
